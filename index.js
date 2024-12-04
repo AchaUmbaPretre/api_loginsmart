@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const path = require('path');
+const authRoutes = require('./routes/auth.routes');
 
 const app = express();
 dotenv.config();
@@ -22,6 +23,9 @@ if (environment === 'development') {
   app.use('/public', express.static(path.join(__dirname, 'public')));
   
   app.setMaxListeners(0);
+
+  app.use('/api/auth', authRoutes)
+
 
 app.listen(port, () => {
     console.log(

@@ -1,12 +1,14 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 exports.register = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { nom, prenom, email, mot_de_passe } = req.body;
 
   try {
-    // Vérifier si l'utilisateur existe déjà
     db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
       if (err) return res.status(500).json({ error: 'Erreur serveur.' });
 
@@ -15,12 +17,12 @@ exports.register = async (req, res) => {
       }
 
       // Hasher le mot de passe
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
 
       // Insérer l'utilisateur
       db.query(
-        'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-        [username, email, hashedPassword],
+        'INSERT INTO users (nom, prenom, email, mot_de_passe) VALUES (?, ?, ?, ?)',
+        [nom, prenom, email, hashedPassword],
         (err, result) => {
           if (err) return res.status(500).json({ error: 'Erreur serveur.' });
           res.status(201).json({ message: 'Utilisateur enregistré avec succès.' });
@@ -33,7 +35,7 @@ exports.register = async (req, res) => {
 };
 
 exports.login = (req, res) => {
-  const { email, password } = req.body;
+  const { email, mot_de_passe } = req.body;
 
   try {
     db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
@@ -44,7 +46,7 @@ exports.login = (req, res) => {
       }
 
       const user = results[0];
-      const isMatch = await bcrypt.compare(password, user.password);
+      const isMatch = await bcrypt.compare(mot_de_passe , user.mot_de_passe);
 
       if (!isMatch) {
         return res.status(401).json({ error: 'Email ou mot de passe incorrect.' });
