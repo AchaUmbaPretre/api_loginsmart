@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 const dotenv = require('dotenv');
+const jwtUtils = require('../utils/jwt');
 
 dotenv.config();
 
@@ -37,29 +38,62 @@ exports.register = async (req, res) => {
 exports.login = (req, res) => {
   const { email, mot_de_passe } = req.body;
 
-  try {
-    db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
-      if (err) return res.status(500).json({ error: 'Erreur serveur.' });
+  const query = 'SELECT * FROM users WHERE email = ? AND mot_de_passe = ?';
+  db.query(query, [email, mot_de_passe], (err, results) => {
+    if (err) return res.status(500).json({ error: 'Erreur serveur' });
 
-      if (results.length === 0) {
-        return res.status(401).json({ error: 'Email ou mot de passe incorrect.' });
-      }
+    if (results.length === 0) {
+      return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
+    }
 
-      const user = results[0];
-      const isMatch = await bcrypt.compare(mot_de_passe , user.mot_de_passe);
+    const user = results[0];
+    const accessToken = jwtUtils.generateAccessToken(user);
+    const refreshToken = jwtUtils.generateRefreshToken(user);
 
-      if (!isMatch) {
-        return res.status(401).json({ error: 'Email ou mot de passe incorrect.' });
-      }
+    // Enregistrez le refresh token dans la base de données
+    const saveRefreshToken = 'UPDATE users SET refresh_token = ? WHERE id = ?';
+    db.query(saveRefreshToken, [refreshToken, user.id], (err) => {
+      if (err) return res.status(500).json({ error: 'Erreur serveur' });
 
-      // Générer un token
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-        expiresIn: '1h',
-      });
-
-      res.status(200).json({ message: 'Authentification réussie.', token });
+      return res.json({ access_token: accessToken, refresh_token: refreshToken });
     });
-  } catch (err) {
-    res.status(500).json({ error: 'Erreur serveur.' });
-  }
+  });
 };
+
+exports.refreshToken = (req, res) => {
+  const { refresh_token } = req.body;
+
+  if (!refresh_token) return res.status(401).json({ error: 'Refresh token manquant' });
+
+  const query = 'SELECT * FROM users WHERE refresh_token = ?';
+  db.query(query, [refresh_token], (err, results) => {
+    if (err) return res.status(500).json({ error: 'Erreur serveur' });
+
+    if (results.length === 0) {
+      return res.status(403).json({ error: 'Refresh token invalide' });
+    }
+
+    const user = results[0];
+
+    try {
+      jwtUtils.verifyRefreshToken(refresh_token);
+
+      // Générer un nouveau access token
+      const newAccessToken = jwtUtils.generateAccessToken(user);
+      return res.json({ access_token: newAccessToken });
+    } catch (error) {
+      return res.status(403).json({ error: 'Refresh token expiré ou invalide' });
+    }
+  });
+};
+
+exports.logout = (req, res) => {
+  const { refresh_token } = req.body;
+
+  const query = 'UPDATE users SET refresh_token = NULL WHERE refresh_token = ?';
+  db.query(query, [refresh_token], (err) => {
+    if (err) return res.status(500).json({ error: 'Erreur serveur' });
+    return res.status(200).json({ message: 'Déconnecté avec succès' });
+  });
+};
+

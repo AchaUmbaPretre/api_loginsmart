@@ -8,7 +8,7 @@ exports.authenticate = (req, res, next) => {
   const token = authHeader.split(' ')[1];
   try {
     const user = jwtUtils.verifyAccessToken(token);
-    req.user = user;
+    req.user = user; // Ajoute les infos utilisateur à la requête
     next();
   } catch (error) {
     return res.status(403).json({ error: 'Token invalide ou expiré' });
