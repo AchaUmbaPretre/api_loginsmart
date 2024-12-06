@@ -7,7 +7,7 @@ const jwtUtils = require('../utils/jwt');
 dotenv.config();
 
 exports.register = async (req, res) => {
-  const { nom, prenom, email, mot_de_passe } = req.body;
+  const { nom, prenom, email, mot_de_passe, img } = req.body;
 
   try {
     db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
@@ -22,9 +22,10 @@ exports.register = async (req, res) => {
 
       // Insérer l'utilisateur
       db.query(
-        'INSERT INTO users (nom, prenom, email, mot_de_passe) VALUES (?, ?, ?, ?)',
-        [nom, prenom, email, hashedPassword],
+        'INSERT INTO users (nom, prenom, email, mot_de_passe, img) VALUES (?, ?, ?, ?, ?)',
+        [nom, prenom, email, hashedPassword, img],
         (err, result) => {
+          console.log(err)
           if (err) return res.status(500).json({ error: 'Erreur serveur.' });
           res.status(201).json({ message: 'Utilisateur enregistré avec succès.' });
         }
