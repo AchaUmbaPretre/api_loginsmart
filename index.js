@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const path = require('path');
 const authRoutes = require('./routes/auth.routes');
+const chauffeurRoutes = require('./routes/chauffeur.routes');
+
 
 const app = express();
 dotenv.config();
@@ -25,6 +27,8 @@ if (environment === 'development') {
   app.setMaxListeners(0);
 
   app.use('/api/auth', authRoutes)
+  app.use('/api/chauffeur', chauffeurRoutes)
+
 
 
 app.listen(port, () => {
