@@ -33,7 +33,6 @@ if (environment === 'development') {
   app.use('/api/type', typeRoutes)
 
 
-
 app.listen(port, () => {
     console.log(
       `Le serveur est connecté au port ${port}`
