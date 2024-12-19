@@ -9,5 +9,7 @@ router.get('/type_fonction', typeController.getTypeFonction);
 router.get('/type_marque', typeController.getTypeMarque);
 router.get('/type_modele', typeController.getTypeModele);
 router.get('/couleur', typeController.getCouleur);
+router.get('/cat_vehicule', typeController.getCatVehicule);
+
 
 module.exports = router;
