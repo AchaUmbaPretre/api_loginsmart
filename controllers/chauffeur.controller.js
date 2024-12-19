@@ -52,7 +52,14 @@ exports.getChauffeur = async (req, res) => {
     };
 
 exports.postChauffeur = async (req, res) => {
+    
     try {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ error: 'Aucun fichier téléchargé' });
+        }
+
+        const profil = req.files.map((file) => file.path.replace(/\\/g, '/')).join(',');
+
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
@@ -66,13 +73,13 @@ exports.postChauffeur = async (req, res) => {
             adresse,
             id_etat_civil,
             statut,
-            profil,
             sexe,
             id_type_contrat,
-            type_trav,
+            type_travail,
             id_permis,
             id_ville,
             date_naissance,
+            date_engagement,
             user_cr,
             tel_service,
         } = req.body;
@@ -80,15 +87,15 @@ exports.postChauffeur = async (req, res) => {
         const query = `
             INSERT INTO chauffeurs (
                 matricule, nom, prenom, telephone, adresse, id_etat_civil,
-                statut, profil, sexe, id_type_contrat, type_trav,
-                id_permis, id_ville, date_naissance, user_cr, tel_service
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                statut, profil, sexe, id_type_contrat, type_travail,
+                id_permis, id_ville, date_naissance, date_engagement, user_cr, tel_service
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
             matricule, nom, prenom, telephone, adresse, id_etat_civil,
-            statut, profil, sexe, id_type_contrat, type_trav,
-            id_permis, id_ville, date_naissance, user_cr, tel_service,
+            statut, profil, sexe, id_type_contrat, type_travail,
+            id_permis, id_ville, date_naissance, date_engagement, user_cr, tel_service,
         ];
 
         const result = await queryAsync(query, values);
