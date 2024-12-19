@@ -1,4 +1,6 @@
 const { db } = require("./../config/database");
+const { validationResult } = require('express-validator');
+
 
 const queryAsync = (query, values = []) =>
     new Promise((resolve, reject) => {
@@ -113,6 +115,15 @@ exports.getTypeModele = async (req, res) => {
     const {id_marque} = req.query;
 
     try {
+        if(!id_marque) {
+            return res.status(400).json({error: 'id_marque est requis'})
+        }
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
         const query = `SELECT * FROM modeles WHERE id_marque = ?`;
     
         const typeFonction = await queryAsync(query,id_marque);
@@ -135,7 +146,7 @@ exports.getCouleur = async (req, res) => {
     try {
         const query = `SELECT * FROM couleurs`;
     
-        const typeFonction = await queryAsync(query,id_marque);
+        const typeFonction = await queryAsync(query);
         
         return res.status(200).json({
             message: 'Liste des couleurs récupérées avec succès',
