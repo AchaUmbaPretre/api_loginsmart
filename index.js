@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const authRoutes = require('./routes/auth.routes');
 const chauffeurRoutes = require('./routes/chauffeur.routes');
+const vehiculeRoutes = require('./routes/chauffeur.routes');
 const typeRoutes = require('./routes/type.routes');
 
 
@@ -29,6 +30,7 @@ if (environment === 'development') {
 
   app.use('/api/auth', authRoutes)
   app.use('/api/chauffeur', chauffeurRoutes)
+  app.use('/api/vehicule', vehiculeRoutes)
   app.use('/api/type', typeRoutes)
 
 
