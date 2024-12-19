@@ -56,7 +56,7 @@ exports.postVehicule = async (req, res) => {
             return res.status(400).json({ error: 'Aucun fichier téléchargé' });
         }
 
-        const profil = req.files.map((file) => file.path.replace(/\\/g, '/')).join(',');
+        const img = req.files.map((file) => file.path.replace(/\\/g, '/')).join(',');
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -74,7 +74,6 @@ exports.postVehicule = async (req, res) => {
             annee_circulation,
             id_cat_vehicule,
             id_type_permis_vehicule,
-            img,
             longueur,
             largeur,
             hauteur,
@@ -113,20 +112,23 @@ exports.postVehicule = async (req, res) => {
                 capacite_carter, nbre_place, nbre_portes, nbre_moteur, cylindre, nbre_cylindre, disposition_cylindre,
                 id_type_carburant, regime_moteur_vehicule, consommation_carburant, turbo, date_service, km_initial, nbre_chev, 
                 id_transmission, id_climatisation, pneus, valeur_acquisition, lubrifiant_moteur, id_etat, user_cr
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
-            matricule, nom, prenom, telephone, adresse, id_etat_civil,
-            statut, profil, sexe, id_type_contrat, type_travail,
-            id_permis, id_ville, date_naissance, date_engagement, user_cr, tel_service,
+            immatriculation, numero_ordre, id_marque, id_modele, variante, num_chassis,  
+            annee_fabrication, annee_circulation, id_cat_vehicule, id_type_permis_vehicule, img,
+            longueur, largeur, hauteur, poids, id_couleur, capacite_carburant, capacite_radiateur,
+            capacite_carter, nbre_place, nbre_portes, nbre_moteur, cylindre, nbre_cylindre, disposition_cylindre, 
+            id_type_carburant, regime_moteur_vehicule, consommation_carburant, turbo, date_service, km_initial, nbre_chev,
+            id_transmission, id_climatisation, pneus, valeur_acquisition, lubrifiant_moteur, id_etat, user_cr 
         ];
 
         const result = await queryAsync(query, values);
 
         return res.status(201).json({
-            message: 'Chauffeur ajouté avec succès',
-            data: { id: result.insertId, nom, prenom },
+            message: 'Véhicule ajouté avec succès',
+            data: { id: result.insertId, immatriculation, numero_ordre },
         });
     } catch (error) {
         console.error('Erreur lors de l’ajout du chauffeur :', error);
@@ -134,8 +136,8 @@ exports.postVehicule = async (req, res) => {
         const statusCode = error.code === 'ER_DUP_ENTRY' ? 409 : 500;
         const errorMessage =
             error.code === 'ER_DUP_ENTRY'
-                ? "Un chauffeur avec ces informations existe déjà."
-                : "Une erreur s'est produite lors de l'ajout du chauffeur.";
+                ? "Un vehicule avec ces informations existe déjà."
+                : "Une erreur s'est produite lors de l'ajout du véhicule.";
 
         return res.status(statusCode).json({ error: errorMessage });
     }
