@@ -30,7 +30,6 @@ exports.getVehiculeCount = async (req, res) => {
     }
 };
 
-
 exports.getVehicule = async (req, res) => {
     try {
         const query = `SELECT * FROM vehicules`;
