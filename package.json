@@ -12,7 +12,8 @@
     "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",
     "nodemailer": "^6.9.16",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "uuid": "^11.0.3"
   },
   "name": "api_loginsmart",
   "description": "[![committers.top badge](https://user-badge.committers.top/congo_kinshasa/AchaUmbaPretre.svg)](https://user-badge.committers.top/congo_kinshasa/AchaUmbaPretre)",
