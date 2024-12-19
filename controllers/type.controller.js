@@ -10,6 +10,7 @@ const queryAsync = (query, values = []) =>
         });
     });
 
+//Categorie de permis
 exports.getCatPermis = async (req, res) => {
     try {
         const query = `SELECT * FROM cat_permis`;
@@ -29,6 +30,7 @@ exports.getCatPermis = async (req, res) => {
     }
 }
 
+//Type de contrat
 exports.getTypeContrat = async (req, res) => {
     try {
         const query = `SELECT * FROM type_contrat`;
@@ -48,6 +50,7 @@ exports.getTypeContrat = async (req, res) => {
     }
 }
 
+//Etat civil
 exports.getEtatCivil = async (req, res) => {
     try {
         const query = `SELECT * FROM etat_civils`;
@@ -67,6 +70,7 @@ exports.getEtatCivil = async (req, res) => {
     }
 }
 
+//Type de fonction
 exports.getTypeFonction = async (req, res) => {
     try {
         const query = `SELECT * FROM type_fonction`;
@@ -82,6 +86,46 @@ exports.getTypeFonction = async (req, res) => {
         
         return res.status(500).json({
             error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
+        });
+    }
+}
+
+exports.getTypeMarque = async (req, res) => {
+    try {
+        const query = `SELECT * FROM marque`;
+    
+        const typeFonction = await queryAsync(query);
+        
+        return res.status(200).json({
+            message: 'Liste des marques récupérées avec succès',
+            data: typeFonction,
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des marques:', error);
+        
+        return res.status(500).json({
+            error: "Une erreur s'est produite lors de la récupération des marques.",
+        });
+    }
+}
+
+exports.getTypeModele = async (req, res) => {
+    const {id_marque} = req.query;
+
+    try {
+        const query = `SELECT * FROM modeles WHERE id_marque = ?`;
+    
+        const typeFonction = await queryAsync(query,id_marque);
+        
+        return res.status(200).json({
+            message: 'Liste des modeles récupérées avec succès',
+            data: typeFonction,
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des modeles:', error);
+        
+        return res.status(500).json({
+            error: "Une erreur s'est produite lors de la récupération des modèles.",
         });
     }
 }
