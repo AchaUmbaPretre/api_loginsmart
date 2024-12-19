@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const  vehiculeController = require('./../controllers/chauffeur.controller');
+const  vehiculeController = require('./../controllers/vehicule.controller');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
@@ -18,3 +18,9 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+router.get('/count', vehiculeController.getVehiculeCount)
+router.get('/', vehiculeController.getVehicule)
+router.post('/', upload.array('img', 10),vehiculeController.postVehicule);
+
+module.exports = router;
