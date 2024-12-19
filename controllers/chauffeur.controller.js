@@ -52,6 +52,7 @@ exports.getChauffeur = async (req, res) => {
     };
 
 exports.postChauffeur = async (req, res) => {
+    console.log(req.body)
     
     try {
         if (!req.files || req.files.length === 0) {
