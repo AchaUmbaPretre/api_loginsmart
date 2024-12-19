@@ -31,6 +31,27 @@ exports.getCarburantCount = async (req, res) => {
     }
 };
 
+
+exports.getCarburant = async (req, res) => {
+    try {
+        const query = `SELECT * FROM plein`;
+
+            const chauffeurs = await queryAsync(query);
+    
+            return res.status(200).json({
+                message: 'Liste des véhicules pleins récupérés avec succès',
+                data: chauffeurs,
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des chauffeurs :', error);
+    
+            return res.status(500).json({
+                error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
+            });
+        }
+};
+
+
 exports.postCarburant = async (req, res) => {
     
     try {
