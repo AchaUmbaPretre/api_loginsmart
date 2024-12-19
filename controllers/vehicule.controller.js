@@ -6,10 +6,10 @@ const queryAsync = (query, values = []) =>
         db.query(query, values, (error, results) => {
             if (error) {
                 return reject(error);
-            }
-            resolve(results);
-        });
+        }
+        resolve(results);
     });
+});
 
 exports.getVehiculeCount = async (req, res) => {
 
