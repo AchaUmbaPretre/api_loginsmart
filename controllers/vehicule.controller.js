@@ -32,7 +32,9 @@ exports.getVehiculeCount = async (req, res) => {
 
 exports.getVehicule = async (req, res) => {
     try {
-        const query = `SELECT * FROM vehicules`;
+        const query = `SELECT v.*, marque.nom_marque, modeles.modele FROM vehicules v
+                            INNER JOIN marque ON v.id_marque = marque.id_marque
+                            INNER JOIN modeles ON v.id_modele = modeles.id_modele`;
 
             const chauffeurs = await queryAsync(query);
     
@@ -50,19 +52,21 @@ exports.getVehicule = async (req, res) => {
 };
 
 exports.postVehicule = async (req, res) => {
-    
+
     try {
-        if (!req.files || req.files.length === 0) {
-            return res.status(400).json({ error: 'Aucun fichier téléchargé' });
+        // Vérification des fichiers téléchargés
+        let img = null;
+        if (req.files && req.files.length > 0) {
+            img = req.files.map((file) => file.path.replace(/\\/g, '/')).join(',');
         }
 
-        const img = req.files.map((file) => file.path.replace(/\\/g, '/')).join(',');
-
+        // Validation des données
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
 
+        // Déstructuration des champs du corps de la requête
         const {
             immatriculation,
             numero_ordre,
@@ -104,39 +108,44 @@ exports.postVehicule = async (req, res) => {
             user_cr
         } = req.body;
 
+        // Préparation de la requête SQL
         const query = `
             INSERT INTO vehicules (
                 immatriculation, numero_ordre, id_marque, id_modele, variante, num_chassis,
                 annee_fabrication, annee_circulation, id_cat_vehicule, id_type_permis_vehicule, img,
                 longueur, largeur, hauteur, poids, id_couleur, capacite_carburant, capacite_radiateur,
                 capacite_carter, nbre_place, nbre_portes, nbre_moteur, cylindre, nbre_cylindre, disposition_cylindre,
-                id_type_carburant, regime_moteur_vehicule, consommation_carburant, turbo, date_service, km_initial, nbre_chev, 
+                id_type_carburant, regime_moteur_vehicule, consommation_carburant, turbo, date_service, km_initial, nbre_chev,
                 id_transmission, id_climatisation, pneus, valeur_acquisition, lubrifiant_moteur, id_etat, user_cr
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
+        // Préparation des valeurs à insérer
         const values = [
             immatriculation, numero_ordre, id_marque, id_modele, variante, num_chassis,  
             annee_fabrication, annee_circulation, id_cat_vehicule, id_type_permis_vehicule, img,
             longueur, largeur, hauteur, poids, id_couleur, capacite_carburant, capacite_radiateur,
             capacite_carter, nbre_place, nbre_portes, nbre_moteur, cylindre, nbre_cylindre, disposition_cylindre, 
             id_type_carburant, regime_moteur_vehicule, consommation_carburant, turbo, date_service, km_initial, nbre_chev,
-            id_transmission, id_climatisation, pneus, valeur_acquisition, lubrifiant_moteur, id_etat, user_cr 
+            id_transmission, id_climatisation, pneus, valeur_acquisition, lubrifiant_moteur, id_etat, user_cr
         ];
 
+        // Exécution de la requête d'insertion
         const result = await queryAsync(query, values);
 
         return res.status(201).json({
             message: 'Véhicule ajouté avec succès',
             data: { id: result.insertId, immatriculation, numero_ordre },
         });
-    } catch (error) {
-        console.error('Erreur lors de l’ajout du chauffeur :', error);
 
+    } catch (error) {
+        console.error('Erreur lors de l’ajout du véhicule :', error);
+
+        // Gestion des erreurs SQL
         const statusCode = error.code === 'ER_DUP_ENTRY' ? 409 : 500;
         const errorMessage =
             error.code === 'ER_DUP_ENTRY'
-                ? "Un vehicule avec ces informations existe déjà."
+                ? "Un véhicule avec ces informations existe déjà."
                 : "Une erreur s'est produite lors de l'ajout du véhicule.";
 
         return res.status(statusCode).json({ error: errorMessage });

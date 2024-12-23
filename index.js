@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
 const path = require('path');
 const authRoutes = require('./routes/auth.routes');
 const chauffeurRoutes = require('./routes/chauffeur.routes');
@@ -20,6 +21,7 @@ if (environment === 'development') {
 }
 
   app.use(cors());
+  app.use(helmet());
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.use(express.json());
