@@ -10,6 +10,7 @@ router.get('/type_marque', typeController.getTypeMarque);
 router.get('/type_modele', typeController.getTypeModele);
 router.get('/couleur', typeController.getCouleur);
 router.get('/cat_vehicule', typeController.getCatVehicule);
+router.get('/type_disposition', typeController.getTypeDisposition );
 
 
 module.exports = router;

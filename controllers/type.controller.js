@@ -184,7 +184,7 @@ exports.getCatVehicule = async (req, res) => {
 }
 
 //Type disposition
-exports.getCatVehicule = async (req, res) => {
+exports.getTypeDisposition = async (req, res) => {
 
     try {
         const query = `SELECT * FROM disposition_cylindre`;
