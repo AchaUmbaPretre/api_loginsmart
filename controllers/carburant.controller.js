@@ -61,14 +61,18 @@ exports.getCarburantOne = async (req, res) => {
     const { id_vehicule } = req.query;
 
     try {
-        const query = `SELECT plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, plein.observation, plein.date_plein, u.nom, v.immatriculation, c.nom AS nom_chauffeur, m.nom_marque, tc.nom_type_carburant FROM plein
+        const query = `SELECT plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, plein.observation, plein.date_plein, u.nom, v.immatriculation, c.nom AS nom_chauffeur, m.nom_marque, tc.nom_type_carburant, md.modele FROM plein
                             INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
                             INNER JOIN users u ON plein.id_user = u.id
                             INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
                             INNER JOIN marque m ON v.id_marque = m.id_marque
-                            INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant`;
+                            INNER JOIN modeles md ON m.id_marque = md.id_marque
+                            INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+                            WHERE plein.immatriculation = ?
+                            GROUP BY plein.id_plein 
+                            `;
 
-            const chauffeurs = await queryAsync(query);
+            const chauffeurs = await queryAsync(query,id_vehicule);
     
             return res.status(200).json({
                 message: 'Liste des véhicules pleins récupérés avec succès',
