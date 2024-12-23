@@ -197,7 +197,6 @@ exports.getCatVehicule = async (req, res) => {
         });
     } catch (error) {
         console.error('Erreur lors de la récupération des dispositions:', error);
-        
         return res.status(500).json({
             error: "Une erreur s'est produite lors de la récupération des dispositions.",
         });
