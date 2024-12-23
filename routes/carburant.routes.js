@@ -3,8 +3,9 @@ const router = express.Router();
 const carburantController = require('./../controllers/carburant.controller');
 
 
-router.get('/count', carburantController.getCarburantCount)
-router.get('/', carburantController.getCarburant)
+router.get('/count', carburantController.getCarburantCount);
+router.get('/', carburantController.getCarburant);
+router.get('/cinq_derniers', carburantController.getCarburantCinq)
 router.post('/', carburantController.postCarburant);
 
 module.exports = router;
