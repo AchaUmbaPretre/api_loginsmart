@@ -53,6 +53,7 @@ exports.getCarburant = async (req, res) => {
 
 
 exports.postCarburant = async (req, res) => {
+    console.log(req.body)
     
     try {
         const errors = validationResult(req);
@@ -69,7 +70,8 @@ exports.postCarburant = async (req, res) => {
             observation,
             id_vehicule,
             id_chauffeur,
-            id_user
+            id_user,
+            date_plein
         } = req.body;
 
         const query = `
@@ -81,14 +83,14 @@ exports.postCarburant = async (req, res) => {
 
         const values = [
             immatriculation, qte_plein, kilometrage, type_carburant, matricule_ch, observation,
-            id_vehicule, id_chauffeur, id_user
+            id_vehicule, id_chauffeur, id_user, date_plein
         ];
 
         const result = await queryAsync(query, values);
 
         return res.status(201).json({
-            message: 'Chauffeur ajouté avec succès',
-            data: { id: result.insertId, nom, prenom },
+            message: 'Carburant ajouté avec succès',
+            data: { id: result.insertId},
         });
     } catch (error) {
         console.error('Erreur lors de l’ajout du carburant :', error);

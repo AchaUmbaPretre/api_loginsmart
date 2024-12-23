@@ -6,6 +6,7 @@ const path = require('path');
 const authRoutes = require('./routes/auth.routes');
 const chauffeurRoutes = require('./routes/chauffeur.routes');
 const vehiculeRoutes = require('./routes/vehicule.routes');
+const carburantRoutes = require('./routes/carburant.routes');
 const typeRoutes = require('./routes/type.routes');
 
 const app = express();
@@ -27,9 +28,10 @@ if (environment === 'development') {
   
   app.setMaxListeners(0);
 
-  app.use('/api/auth', authRoutes)
-  app.use('/api/chauffeur', chauffeurRoutes)
-  app.use('/api/vehicule', vehiculeRoutes)
+  app.use('/api/auth', authRoutes);
+  app.use('/api/chauffeur', chauffeurRoutes);
+  app.use('/api/vehicule', vehiculeRoutes);
+  app.use('/api/carburant', carburantRoutes);
   app.use('/api/type', typeRoutes)
 
 
