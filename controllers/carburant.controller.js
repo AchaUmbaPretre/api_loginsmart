@@ -34,7 +34,11 @@ exports.getCarburantCount = async (req, res) => {
 
 exports.getCarburant = async (req, res) => {
     try {
-        const query = `SELECT * FROM plein`;
+        const query = `SELECT plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, plein.observation, plein.date_plein, u.nom, v.immatriculation, c.nom AS nom_chauffeur, ma FROM plein
+                            INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
+                            INNER JOIN users u ON plein.id_user = u.id
+                            INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+                            INNER JOIN marque m ON v.id_marque = m.id_marque`;
 
             const chauffeurs = await queryAsync(query);
     
