@@ -54,7 +54,6 @@ exports.getVehicule = async (req, res) => {
 exports.postVehicule = async (req, res) => {
 
     try {
-        // Vérification des fichiers téléchargés
         let img = null;
         if (req.files && req.files.length > 0) {
             img = req.files.map((file) => file.path.replace(/\\/g, '/')).join(',');
