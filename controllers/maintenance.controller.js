@@ -11,12 +11,12 @@ const queryAsync = (query, values = []) =>
         });
     });
 
-    
+
 //Reparation
 exports.getReparation = async (req, res) => {
 
     try {
-        const query = `SELECT rp.id_reparation, rp.date_reparation, rp.cout, rp.commentaire, v.immatriculation, m.nom_marque, tr.type_rep, sr.montant, sr.description, f.nom FROM reparations rp
+        const query = `SELECT rp.id_reparation, rp.date_reparation, rp.cout, rp.commentaire, v.immatriculation, m.nom_marque, tr.type_rep, sr.montant, sr.description, f.nom AS fournisseur FROM reparations rp
                         INNER JOIN vehicules v ON rp.immatriculation = v.id_vehicule
                         INNER JOIN marque m ON v.id_marque = m.id_marque
                         INNER JOIN sud_reparation sr ON rp.id_reparation = sr.id_reparation
