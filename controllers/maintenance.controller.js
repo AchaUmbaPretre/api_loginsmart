@@ -32,11 +32,7 @@ exports.getReparation = async (req, res) => {
 }
 
 exports.postReparation = async (req, res) => {
-
-    console.log(req.body)
-    
     try {
-
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
@@ -50,40 +46,49 @@ exports.postReparation = async (req, res) => {
             cout,
             id_fournisseur,
             commentaire,
-            code_rep
+            code_rep,
+            reparations
         } = req.body;
 
-        const query = `
+        // Insertion dans la table `reparations`
+        const insertReparationQuery = `
             INSERT INTO reparations (
                 immatriculation, date_reparation, date_sortie, date_prevu, cout, id_fournisseur,
                 commentaire, code_rep
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
-        const querySud = `
-            INSERT INTO sud_reparation (
-                id_reparation, id_type_reparation, montant, description
-            ) VALUES (?, ?, ?)
-        `;
-
-        const values = [
+        const reparationValues = [
             immatriculation, date_reparation, date_sortie, date_prevu, cout, id_fournisseur,
             commentaire, code_rep
         ];
 
-        const result = await queryAsync(query, values);
-        const inserId = result.inserId;
+        const result = await queryAsync(insertReparationQuery, reparationValues);
+        const insertId = result.insertId;
 
+        // Vérification si sudReparations est bien un tableau
+        if (!Array.isArray(sudReparations)) {
+            return res.status(400).json({
+                error: "Le champ `sudReparations` doit être un tableau."
+            });
+        }
 
-        req.body.map((d)=> {
-            const valuesSub = [ inserId, d.montant, d.id_type_reparation, d.description]
-            const result2 = queryAsync(query, valuesSub);
+        const insertSudReparationQuery = `
+            INSERT INTO sud_reparation (
+                id_reparation, id_type_reparation, montant, description
+            ) VALUES (?, ?, ?, ?)
+        `;
 
-        })
+        const sudReparationPromises = reparations.map((sud) => {
+            const sudValues = [insertId, sud.id_type_reparation, sud.montant, sud.description];
+            return queryAsync(insertSudReparationQuery, sudValues);
+        });
+
+        await Promise.all(sudReparationPromises);
 
         return res.status(201).json({
             message: 'La réparation a été ajoutée avec succès',
-            data: { id: result.insertId},
+            data: { id: insertId },
         });
     } catch (error) {
         console.error('Erreur lors de l’ajout de maintenance :', error);
@@ -91,8 +96,8 @@ exports.postReparation = async (req, res) => {
         const statusCode = error.code === 'ER_DUP_ENTRY' ? 409 : 500;
         const errorMessage =
             error.code === 'ER_DUP_ENTRY'
-                ? "Un chauffeur avec ces informations existe déjà."
-                : "Une erreur s'est produite lors de l'ajout de maintenance.";
+                ? "Une réparation avec ces informations existe déjà."
+                : "Une erreur s'est produite lors de l'ajout de la réparation.";
 
         return res.status(statusCode).json({ error: errorMessage });
     }
