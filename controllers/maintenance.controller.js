@@ -14,7 +14,9 @@ const queryAsync = (query, values = []) =>
 //Reparation
 exports.getReparation = async (req, res) => {
     try {
-        const query = `SELECT * FROM reparations`;
+        const query = `SELECT rp.id_reparation, rp.date_reparation, rp.cout, rp.commentaire, v.immatriculation, m.nom_marque FROM reparations rp
+                        INNER JOIN vehicules v ON rp.immatriculation = v.id_vehicule
+                        INNER JOIN marque m ON v.id_marque = m.id_marque`;
     
         const réparation = await queryAsync(query);
         
