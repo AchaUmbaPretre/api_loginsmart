@@ -11,7 +11,7 @@ const queryAsync = (query, values = []) =>
         });
     });
 
-//Categorie de permis
+//Reparation
 exports.getReparation = async (req, res) => {
     try {
         const query = `SELECT * FROM reparations`;
@@ -32,6 +32,8 @@ exports.getReparation = async (req, res) => {
 }
 
 exports.postReparation = async (req, res) => {
+
+    console.log(req.body)
     
     try {
 
@@ -58,12 +60,26 @@ exports.postReparation = async (req, res) => {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
+        const querySud = `
+            INSERT INTO sud_reparation (
+                id_reparation, id_type_reparation, montant, description
+            ) VALUES (?, ?, ?)
+        `;
+
         const values = [
             immatriculation, date_reparation, date_sortie, date_prevu, cout, id_fournisseur,
             commentaire, code_rep
         ];
 
         const result = await queryAsync(query, values);
+        const inserId = result.inserId;
+
+
+        req.body.map((d)=> {
+            const valuesSub = [ inserId, d.montant, d.id_type_reparation, d.description]
+            const result2 = queryAsync(query, valuesSub);
+
+        })
 
         return res.status(201).json({
             message: 'La réparation a été ajoutée avec succès',
