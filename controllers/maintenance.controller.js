@@ -50,7 +50,6 @@ exports.postReparation = async (req, res) => {
             reparations
         } = req.body;
 
-        // Insertion dans la table `reparations`
         const insertReparationQuery = `
             INSERT INTO reparations (
                 immatriculation, date_reparation, date_sortie, date_prevu, cout, id_fournisseur,
@@ -66,10 +65,9 @@ exports.postReparation = async (req, res) => {
         const result = await queryAsync(insertReparationQuery, reparationValues);
         const insertId = result.insertId;
 
-        // Vérification si sudReparations est bien un tableau
-        if (!Array.isArray(sudReparations)) {
+        if (!Array.isArray(reparations)) {
             return res.status(400).json({
-                error: "Le champ `sudReparations` doit être un tableau."
+                error: "Le champ `réparations` doit être un tableau."
             });
         }
 
