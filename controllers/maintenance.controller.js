@@ -129,17 +129,18 @@ exports.postControlTech = async (req, res) => {
             taxe,
             id_fournisseur,
             id_chauffeur,
-            commentaire
+            commentaire,
+            reparations
         } = req.body;
 
-        const insertReparationQuery = `
+        const insertQuery = `
             INSERT INTO controle_tech (
                 immatriculation, date_controle, date_validite, kilometrage, ref_controle, id_agent,
                  resultat, cout_device, cout_ttc, taxe, id_fournisseur, id_chauffeur, commentaire
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
-        const reparationValues = [
+        const controleValues = [
             immatriculation,
             date_controle,
             date_validite,
@@ -155,7 +156,7 @@ exports.postControlTech = async (req, res) => {
             commentaire
         ];
 
-        const result = await queryAsync(insertReparationQuery, reparationValues);
+        const result = await queryAsync(insertQuery, controleValues);
         const insertId = result.insertId;
 
         if (!Array.isArray(reparations)) {
@@ -165,20 +166,20 @@ exports.postControlTech = async (req, res) => {
         }
 
         const insertSudReparationQuery = `
-            INSERT INTO sud_reparation (
-                id_reparation, id_type_reparation, montant, description
+            INSERT INTO sub_controle_tech (
+                id_controle_tech, id_type_reparation, visite, description
             ) VALUES (?, ?, ?, ?)
         `;
 
         const sudReparationPromises = reparations.map((sud) => {
-            const sudValues = [insertId, sud.id_type_reparation, sud.montant, sud.description];
+            const sudValues = [insertId, sud.id_type_reparation, sud.visite, sud.description];
             return queryAsync(insertSudReparationQuery, sudValues);
         });
 
         await Promise.all(sudReparationPromises);
 
         return res.status(201).json({
-            message: 'La réparation a été ajoutée avec succès',
+            message: 'Le controle technique a été ajouté avec succès',
             data: { id: insertId },
         });
     } catch (error) {
