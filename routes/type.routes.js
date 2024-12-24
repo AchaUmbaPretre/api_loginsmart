@@ -13,6 +13,6 @@ router.get('/cat_vehicule', typeController.getCatVehicule);
 router.get('/type_disposition', typeController.getTypeDisposition);
 router.get('/type_carburant', typeController.getTypeCarburant);
 router.get('/type_reparation', typeController.getTypeReparation);
-
+router.get('/fournisseur', typeController.getFournisseur);
 
 module.exports = router;
