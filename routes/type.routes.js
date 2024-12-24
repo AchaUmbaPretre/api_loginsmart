@@ -12,6 +12,7 @@ router.get('/couleur', typeController.getCouleur);
 router.get('/cat_vehicule', typeController.getCatVehicule);
 router.get('/type_disposition', typeController.getTypeDisposition);
 router.get('/type_carburant', typeController.getTypeCarburant);
+router.get('/type_reparation', typeController.getTypeReparation);
 
 
 module.exports = router;
