@@ -293,14 +293,8 @@ exports.postSuivi = async (req, res) => {
         }
 
         const {
-            id_reparation,
-            id_tache,
-            id_piece,
-            cout,
-            description,
-            id_etat,
-            user_cr
-        } = req.body;
+            suivie
+        } = req.body.values;
 
         const query = `
             INSERT INTO suivi_reparation (
@@ -308,16 +302,19 @@ exports.postSuivi = async (req, res) => {
                 user_cr
             ) VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
+        const suiviPromise = suivie.map((s) => {
+            const values = [
+                req.body.id_reparation, s.id_tache, s.id_piece, s.cout, s.description, 1,
+                1];
 
-        const values = [
-            id_reparation, id_tache, id_piece, cout, description, id_etat,
-            user_cr];
+            return queryAsync(query, values)
+        })
 
-        const result = await queryAsync(query, values);
+        await Promise.all(suiviPromise);
 
         return res.status(201).json({
             message: 'Suivie réparation ajouté avec succès',
-            data: { id: result.insertId }
+            data: { id: suiviPromise.insertId }
         });
     } catch (error) {
         console.error('Erreur lors de l’ajout de suivie réparation :', error);
