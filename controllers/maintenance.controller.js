@@ -127,6 +127,12 @@ exports.postReparation = async (req, res) => {
             reparations
         } = req.body;
 
+        if (!Array.isArray(reparations)) {
+            return res.status(400).json({
+                error: "Le champ `réparations` doit être un tableau."
+            });
+        }
+
         const insertReparationQuery = `
             INSERT INTO reparations (
                 immatriculation, date_reparation, date_sortie, date_prevu, cout, id_fournisseur, id_type_reparation, montant, description,
@@ -134,32 +140,19 @@ exports.postReparation = async (req, res) => {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
-        const reparationValues = [
-            immatriculation, date_reparation, date_sortie, date_prevu, cout, id_fournisseur,
-            commentaire, code_rep
-        ];
 
-        const result = await queryAsync(insertReparationQuery, reparationValues);
-        const insertId = result.insertId;
+        const reparationPromise = reparations.map((sud)=> {
 
-        if (!Array.isArray(reparations)) {
-            return res.status(400).json({
-                error: "Le champ `réparations` doit être un tableau."
-            });
-        }
+            const reparationValues = [
+                immatriculation, date_reparation, date_sortie, date_prevu, cout, id_fournisseur, sud.id_type_reparation, 
+                sud.montant, sud.description, commentaire, code_rep
+            ];
 
-        const insertSudReparationQuery = `
-            INSERT INTO sud_reparation (
-                id_reparation, id_type_reparation, montant, description
-            ) VALUES (?, ?, ?, ?)
-        `;
+            return queryAsync(insertReparationQuery, reparationValues);
 
-        const sudReparationPromises = reparations.map((sud) => {
-            const sudValues = [insertId, sud.id_type_reparation, sud.montant, sud.description];
-            return queryAsync(insertSudReparationQuery, sudValues);
-        });
+        })
 
-        await Promise.all(sudReparationPromises);
+        await Promise.all(reparationPromise);
 
         return res.status(201).json({
             message: 'La réparation a été ajoutée avec succès',
