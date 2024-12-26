@@ -298,7 +298,7 @@ exports.postSuivie = async (req, res) => {
 
         return res.status(201).json({
             message: 'Suivie réparation ajouté avec succès',
-            data: { id: result.insertId },
+            data: { id: result.insertId }
         });
     } catch (error) {
         console.error('Erreur lors de l’ajout de suivie réparation :', error);
@@ -306,7 +306,7 @@ exports.postSuivie = async (req, res) => {
         const statusCode = error.code === 'ER_DUP_ENTRY' ? 409 : 500;
         const errorMessage =
             error.code === 'ER_DUP_ENTRY'
-                ? "Un chauffeur avec ces informations existe déjà."
+                ? "Suivie avec ces informations existe déjà."
                 : "Une erreur s'est produite lors de l'ajout.";
 
         return res.status(statusCode).json({ error: errorMessage });
