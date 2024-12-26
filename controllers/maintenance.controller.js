@@ -16,11 +16,12 @@ const queryAsync = (query, values = []) =>
 exports.getReparation = async (req, res) => {
 
     try {
-        const query = `SELECT rp.id_reparation, rp.date_reparation, rp.cout, rp.commentaire, v.immatriculation, m.nom_marque, tr.type_rep, rp.montant, rp.description, f.nom AS fournisseur FROM reparations rp
+        const query = `SELECT rp.id_reparation, rp.date_reparation, rp.cout, rp.commentaire, v.immatriculation, m.nom_marque, tr.type_rep, rp.montant, rp.description, f.nom AS fournisseur, em.etat_maintenance FROM reparations rp
                         INNER JOIN vehicules v ON rp.immatriculation = v.id_vehicule
                         INNER JOIN marque m ON v.id_marque = m.id_marque
                         INNER JOIN type_reparations tr ON rp.id_type_reparation = tr.id_type_reparation
-                        INNER JOIN fournisseurs f ON rp.id_fournisseur = f.id_fournisseur`;
+                        INNER JOIN fournisseurs f ON rp.id_fournisseur = f.id_fournisseur
+                        INNER JOIN etat_maintenance em ON rp.id_etat = em.id_etat_maintenance`;
     
         const réparation = await queryAsync(query);
         
@@ -135,8 +136,8 @@ exports.postReparation = async (req, res) => {
         const insertReparationQuery = `
             INSERT INTO reparations (
                 immatriculation, date_reparation, date_sortie, date_prevu, cout, id_fournisseur, id_type_reparation, montant, description,
-                commentaire, code_rep
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                commentaire,id_etat, code_rep
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const reparationPromises = reparations.map((sud) => {
@@ -151,6 +152,7 @@ exports.postReparation = async (req, res) => {
                 sud.montant,
                 sud.description,
                 commentaire,
+                1,
                 code_rep
             ];
 
