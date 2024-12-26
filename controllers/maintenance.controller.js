@@ -284,6 +284,27 @@ exports.getSuivi = async (req, res) => {
         }
     };
 
+exports.getSuiviOne = async (req, res) => {
+    const { id_reparation} = req.query;
+
+        try {
+            const query = `SELECT * FROM suivi_reparation WHERE id_reparation = ?`;
+    
+                const suivie = await queryAsync(query, id_reparation);
+        
+                return res.status(200).json({
+                    message: 'Liste des suivie réparation récupérées avec succès',
+                    data: suivie,
+                });
+            } catch (error) {
+                console.error('Erreur lors de la récupération des suivie :', error);
+        
+                return res.status(500).json({
+                    error: "Une erreur s'est produite lors de la récupération des suivie.",
+                });
+            }
+        };
+
 exports.postSuivi = async (req, res) => {
     
     try {
