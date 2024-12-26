@@ -108,7 +108,6 @@ exports.postReparation = async (req, res) => {
     }
 };
 
-
 exports.postControlTech = async (req, res) => {
     try {
         const errors = validationResult(req);
