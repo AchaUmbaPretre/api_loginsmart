@@ -283,7 +283,7 @@ exports.getTache = async (req, res) => {
     }
 }
 
-//Type tache
+//Categorie piece
 exports.getCatPieces = async (req, res) => {
 
     try {
