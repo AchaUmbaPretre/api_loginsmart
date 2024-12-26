@@ -14,5 +14,7 @@ router.get('/type_disposition', typeController.getTypeDisposition);
 router.get('/type_carburant', typeController.getTypeCarburant);
 router.get('/type_reparation', typeController.getTypeReparation);
 router.get('/fournisseur', typeController.getFournisseur);
+router.get('/type_tache', typeController.getTache);
+router.get('/cat_piece', typeController.getCatPieces);
 
 module.exports = router;
