@@ -129,7 +129,7 @@ exports.postReparation = async (req, res) => {
 
         if (!Array.isArray(reparations)) {
             return res.status(400).json({
-                error: "Le champ `réparations` doit être un tableau."
+                error: "Le champ `reparations` doit être un tableau."
             });
         }
 
@@ -140,36 +140,43 @@ exports.postReparation = async (req, res) => {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
-
-        const reparationPromise = reparations.map((sud)=> {
-
+        const reparationPromises = reparations.map((sud) => {
             const reparationValues = [
-                immatriculation, date_reparation, date_sortie, date_prevu, cout, id_fournisseur, sud.id_type_reparation, 
-                sud.montant, sud.description, commentaire, code_rep
+                immatriculation,
+                date_reparation,
+                date_sortie,
+                date_prevu,
+                cout,
+                id_fournisseur,
+                sud.id_type_reparation,
+                sud.montant,
+                sud.description,
+                commentaire,
+                code_rep
             ];
 
             return queryAsync(insertReparationQuery, reparationValues);
+        });
 
-        })
-
-        await Promise.all(reparationPromise);
+        await Promise.all(reparationPromises);
 
         return res.status(201).json({
-            message: 'La réparation a été ajoutée avec succès',
-            data: { id: insertId },
+            message: 'Les réparations ont été ajoutées avec succès.'
         });
     } catch (error) {
-        console.error('Erreur lors de l’ajout de maintenance :', error);
+        console.error('Erreur lors de l’ajout de réparation :', error);
 
+        // Gestion des erreurs spécifiques et des erreurs générales
         const statusCode = error.code === 'ER_DUP_ENTRY' ? 409 : 500;
         const errorMessage =
             error.code === 'ER_DUP_ENTRY'
                 ? "Une réparation avec ces informations existe déjà."
-                : "Une erreur s'est produite lors de l'ajout de la réparation.";
+                : "Une erreur s'est produite lors de l'ajout des réparations.";
 
         return res.status(statusCode).json({ error: errorMessage });
     }
 };
+
 
 exports.postControlTech = async (req, res) => {
     try {
