@@ -16,7 +16,7 @@ const queryAsync = (query, values = []) =>
 exports.getReparation = async (req, res) => {
 
     try {
-        const query = `SELECT rp.id_reparation, rp.date_reparation, rp.cout, rp.commentaire, v.immatriculation, m.nom_marque, tr.type_rep, rp.montant, rp.description, f.nom AS fournisseur, em.etat_maintenance FROM reparations rp
+        const query = `SELECT rp.id_reparation, rp.date_reparation, rp.cout, rp.commentaire, v.immatriculation, m.nom_marque, tr.type_rep, rp.montant, rp.description, f.nom AS fournisseur, em.id_etat_maintenance FROM reparations rp
                         INNER JOIN vehicules v ON rp.immatriculation = v.id_vehicule
                         INNER JOIN marque m ON v.id_marque = m.id_marque
                         INNER JOIN type_reparations tr ON rp.id_type_reparation = tr.id_type_reparation
@@ -60,13 +60,13 @@ exports.getReparation = async (req, res) => {
         const insertReparationQuery = `
             INSERT INTO reparations (
                 immatriculation, date_reparation, date_sortie, date_prevu, cout, id_fournisseur,
-                commentaire, code_rep
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                commentaire,id_etat, code_rep
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const reparationValues = [
             immatriculation, date_reparation, date_sortie, date_prevu, cout, id_fournisseur,
-            commentaire, code_rep
+            commentaire, 1, code_rep
         ];
 
         const result = await queryAsync(insertReparationQuery, reparationValues);
@@ -177,6 +177,7 @@ exports.postReparation = async (req, res) => {
         return res.status(statusCode).json({ error: errorMessage });
     }
 };
+
 
 
 exports.postControlTech = async (req, res) => {
