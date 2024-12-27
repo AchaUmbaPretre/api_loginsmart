@@ -284,7 +284,7 @@ exports.getSuivi = async (req, res) => {
         }
     };
 
-exports.getSuiviOne = async (req, res) => {
+exports.getSuiviOneReparation = async (req, res) => {
     const { id_reparation} = req.query;
 
         try {

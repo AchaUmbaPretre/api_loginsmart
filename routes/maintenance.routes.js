@@ -6,7 +6,7 @@ router.get('/reparation', maintenantController.getReparation)
 router.post('/reparation', maintenantController.postReparation)
 
 router.get('/suivi', maintenantController.getSuivi)
-router.get('/suivi/one', maintenantController.getSuiviOne)
+router.get('/suivi/one_reparation', maintenantController.getSuiviOneReparation)
 
 router.post('/suivi', maintenantController.postSuivi)
 
