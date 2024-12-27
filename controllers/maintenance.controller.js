@@ -14,29 +14,45 @@ const queryAsync = (query, values = []) =>
 
 //Reparation
 exports.getReparation = async (req, res) => {
-
     try {
-        const query = `SELECT rp.id_reparation, rp.date_reparation,rp.date_prevu, rp.cout, rp.commentaire, v.immatriculation, m.nom_marque, tr.type_rep, rp.montant, rp.description, f.nom AS fournisseur, em.id_etat_maintenance FROM reparations rp
-                        INNER JOIN vehicules v ON rp.immatriculation = v.id_vehicule
-                        INNER JOIN marque m ON v.id_marque = m.id_marque
-                        INNER JOIN type_reparations tr ON rp.id_type_reparation = tr.id_type_reparation
-                        INNER JOIN fournisseurs f ON rp.id_fournisseur = f.id_fournisseur
-                        INNER JOIN etat_maintenance em ON rp.id_etat = em.id_etat_maintenance`;
-    
+        const query = `
+            SELECT 
+                rp.id_reparation, 
+                rp.date_reparation,
+                rp.date_prevu, 
+                rp.cout, 
+                rp.commentaire, 
+                v.immatriculation, 
+                m.nom_marque, 
+                tr.type_rep, 
+                rp.montant, 
+                rp.description, 
+                f.nom AS fournisseur, 
+                em.id_etat_maintenance,
+                DATEDIFF(rp.date_prevu, rp.date_reparation) AS nbre_jour
+            FROM reparations rp
+            INNER JOIN vehicules v ON rp.immatriculation = v.id_vehicule
+            INNER JOIN marque m ON v.id_marque = m.id_marque
+            INNER JOIN type_reparations tr ON rp.id_type_reparation = tr.id_type_reparation
+            INNER JOIN fournisseurs f ON rp.id_fournisseur = f.id_fournisseur
+            INNER JOIN etat_maintenance em ON rp.id_etat = em.id_etat_maintenance;
+        `;
+
         const réparation = await queryAsync(query);
-        
+
         return res.status(200).json({
             message: 'Liste des réparations récupérée avec succès',
             data: réparation,
         });
     } catch (error) {
         console.error('Erreur lors de la récupération des réparations :', error);
-        
+
         return res.status(500).json({
-                    error: "Une erreur s'est produite lors de la récupération des réparations.",
+            error: "Une erreur s'est produite lors de la récupération des réparations.",
         });
     }
-}
+};
+
 
 exports.getReparationOne = async (req, res) => {
     const { id_reparation } = req.query;
@@ -205,7 +221,26 @@ exports.postReparation = async (req, res) => {
     }
 };
 
-exports.postControlTech = async (req, res) => {
+//Controle technique
+exports.getControleTechnique = async (req, res) => {
+    try {
+        const query = `SELECT * FROM controle_tech`;
+
+            const controle = await queryAsync(query);
+    
+            return res.status(200).json({
+                message: 'Liste de controle de technique récupérées avec succès',
+                data: controle,
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des suivie :', error);
+            return res.status(500).json({
+                error: "Une erreur s'est produite lors de la récupération des suivie.",
+            });
+        }
+};
+
+exports.postControlTechnique = async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {

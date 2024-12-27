@@ -11,4 +11,8 @@ router.get('/suivi/one_reparation', maintenantController.getSuiviOneReparation)
 
 router.post('/suivi', maintenantController.postSuivi)
 
+//Controle technique
+router.get('/controle', maintenantController.getControleTechnique);
+router.post('/controle', maintenantController.postControlTechnique)
+
 module.exports = router;

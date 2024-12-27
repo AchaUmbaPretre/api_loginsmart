@@ -34,7 +34,7 @@ exports.getVehicule = async (req, res) => {
     try {
         const query = `SELECT v.*, marque.nom_marque, modeles.modele, cv.nom_cat FROM vehicules v
                             INNER JOIN marque ON v.id_marque = marque.id_marque
-                            INNER JOIN modeles ON v.id_modele = modeles.id_modele
+                            LEFT JOIN modeles ON v.id_modele = modeles.id_modele
                             INNER JOIN categorie_vehicules cv ON v.id_cat_vehicule = cv.id`;
 
             const chauffeurs = await queryAsync(query);
