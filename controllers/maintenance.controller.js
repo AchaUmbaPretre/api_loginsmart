@@ -223,6 +223,7 @@ exports.postReparation = async (req, res) => {
 
 //Controle technique
 exports.getControleTechnique = async (req, res) => {
+    
     try {
         const query = `SELECT ct.id_controle_tech, ct.date_controle, ct.date_validite, ct.kilometrage, ct.ref_controle, ct.resultat, ct.cout_device, ct.cout_ttc, ct.taxe, v.immatriculation, f.nom, c.nom FROM controle_tech ct
                         INNER JOIN vehicules v ON ct.immatriculation = v.id_vehicule
