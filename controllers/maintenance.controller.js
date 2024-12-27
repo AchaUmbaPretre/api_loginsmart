@@ -336,7 +336,7 @@ exports.postSuivi = async (req, res) => {
         `;
         const suiviPromise = suivie.map((s) => {
             const values = [
-                req.body.id_reparation, s.id_tache, s.id_piece, s.cout, s.description, 1,
+                req.body.id_reparation, s.id_tache, s.id_piece, s.cout, s.description, s.id_etat,
                 1];
 
             return queryAsync(query, values)
