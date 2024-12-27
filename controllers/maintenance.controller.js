@@ -267,10 +267,12 @@ exports.postControlTech = async (req, res) => {
 //Suivie 
 exports.getSuivi = async (req, res) => {
     try {
-        const query = `SELECT sr.id_suivi_reparation, sr.cout, sr.description, r.immatriculation, tt.type_tache FROM suivi_reparation sr
+        const query = `SELECT sr.id_suivi_reparation, sr.cout, sr.description, tt.type_tache, v.immatriculation, cp.titre AS nom_piece, m.nom_marque FROM suivi_reparation sr
                             INNER JOIN reparations r ON sr.id_reparation = r.id_reparation
                             INNER JOIN type_tache tt ON sr.id_tache = tt.id_type_tache
-                            INNER JOIN categorie_pieces cp ON sr.id_piece = cp.id`;
+                            INNER JOIN categorie_pieces cp ON sr.id_piece = cp.id
+                            INNER JOIN vehicules v ON r.immatriculation = v.id_vehicule
+                            INNER JOIN marque m ON v.id_marque = m.id_marque`;
 
             const suivie = await queryAsync(query);
     
@@ -291,11 +293,13 @@ exports.getSuiviOneReparation = async (req, res) => {
     const { id_reparation} = req.query;
 
         try {
-            const query =   `SELECT sr.id_suivi_reparation, sr.cout, sr.description, r.immatriculation, tt.type_tache FROM suivi_reparation sr
+            const query =   `SELECT sr.id_suivi_reparation, sr.cout, sr.description, tt.type_tache, v.immatriculation, cp.titre AS nom_piece, m.nom_marque FROM suivi_reparation sr
                                 INNER JOIN reparations r ON sr.id_reparation = r.id_reparation
                                 INNER JOIN type_tache tt ON sr.id_tache = tt.id_type_tache
                                 INNER JOIN categorie_pieces cp ON sr.id_piece = cp.id
-                            WHERE id_reparation = ?`;
+                                INNER JOIN vehicules v ON r.immatriculation = v.id_vehicule
+                                INNER JOIN marque m ON v.id_marque = m.id_marque
+                            WHERE sr.id_reparation = ?`;
     
                 const suivie = await queryAsync(query, id_reparation);
         
