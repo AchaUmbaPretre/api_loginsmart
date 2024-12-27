@@ -152,7 +152,7 @@ exports.postReparation = async (req, res) => {
                 sud.montant,
                 sud.description,
                 commentaire,
-                1,
+                2,
                 code_rep
             ];
 
