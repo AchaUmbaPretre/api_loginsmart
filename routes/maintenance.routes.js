@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const  maintenantController = require('./../controllers/maintenance.controller');
 
-router.get('/reparation', maintenantController.getReparation)
+router.get('/reparation', maintenantController.getReparation);
+router.get('/reparation/one', maintenantController.getReparationOne)
 router.post('/reparation', maintenantController.postReparation)
 
 router.get('/suivi', maintenantController.getSuivi)
