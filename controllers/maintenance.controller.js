@@ -267,7 +267,10 @@ exports.postControlTech = async (req, res) => {
 //Suivie 
 exports.getSuivi = async (req, res) => {
     try {
-        const query = `SELECT * FROM suivi_reparation`;
+        const query = `SELECT sr.id_suivi_reparation, sr.cout, sr.description, r.immatriculation, tt.type_tache FROM suivi_reparation sr
+                            INNER JOIN reparations r ON sr.id_reparation = r.id_reparation
+                            INNER JOIN type_tache tt ON sr.id_tache = tt.id_type_tache
+                            INNER JOIN categorie_pieces cp ON sr.id_piece = cp.id`;
 
             const suivie = await queryAsync(query);
     
@@ -288,7 +291,11 @@ exports.getSuiviOneReparation = async (req, res) => {
     const { id_reparation} = req.query;
 
         try {
-            const query = `SELECT * FROM suivi_reparation WHERE id_reparation = ?`;
+            const query = `SELECT sr.id_suivi_reparation, sr.cout, sr.description, r.immatriculation, tt.type_tache FROM suivi_reparation sr
+                                INNER JOIN reparations r ON sr.id_reparation = r.id_reparation
+                                INNER JOIN type_tache tt ON sr.id_tache = tt.id_type_tache
+                                INNER JOIN categorie_pieces cp ON sr.id_piece = cp.id
+                            WHERE id_reparation = ?`;
     
                 const suivie = await queryAsync(query, id_reparation);
         
