@@ -16,5 +16,6 @@ router.get('/type_reparation', typeController.getTypeReparation);
 router.get('/fournisseur', typeController.getFournisseur);
 router.get('/type_tache', typeController.getTache);
 router.get('/cat_piece', typeController.getCatPieces);
+router.get('/etat_maintenance', typeController.getEtatMaintenant);
 
 module.exports = router;

@@ -302,3 +302,23 @@ exports.getCatPieces = async (req, res) => {
         });
     }
 }
+
+//Type d' etat maintenance
+exports.getEtatMaintenant = async (req, res) => {
+
+    try {
+        const query = `SELECT * FROM etat_maintenance`;
+    
+        const etatMaintenance = await queryAsync(query);
+        
+        return res.status(200).json({
+            message: 'Liste d état des maintenances récupérés avec succès',
+            data: etatMaintenance,
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des dispositions:', error);
+        return res.status(500).json({
+            error: "Une erreur s'est produite lors de la récupération des dispositions.",
+        });
+    }
+}
