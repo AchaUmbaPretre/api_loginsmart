@@ -137,45 +137,60 @@ exports.getCarburantCinq = async (req, res) => {
 };
 
 exports.getCarburantConsomm = async (req, res) => {
-    console.log(req.query.targetKeys)
+
+    const { targetKeys, selectedDates } = req.query;
+
+    const targetKeysArray = targetKeys ? targetKeys.split(',') : [];
+    const [startDate, endDate] = selectedDates ? selectedDates.split(',') : [null, null];
 
     try {
-        const query = `SELECT 
-                            SUM(plein.kilometrage) AS Total_Kilometrage,
-                            MAX(plein.kilometrage) - MIN(plein.kilometrage) AS Km_Parcourus,
-                            SUM(plein.qte_plein) AS Total_Litres,
-                            (SUM(plein.qte_plein) / (MAX(plein.kilometrage) - MIN(plein.kilometrage))) * 100 AS Consommation_Litres_Par_100Km,
-                            COUNT(plein.id_plein) AS Nbre_De_Plein,
-                            v.immatriculation,
-                            c.nom AS Nom_Chauffeur,
-                            m.nom_marque,
-                            tc.nom_type_carburant
-                        FROM plein
-                            INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
-                            INNER JOIN users u ON plein.id_user = u.id
-                            INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
-                            INNER JOIN marque m ON v.id_marque = m.id_marque
-                            INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
-                        GROUP BY 
-                            v.immatriculation, 
-                            c.nom, 
-                            m.nom_marque, 
-                            tc.nom_type_carburant;`;
+        const query = `
+            SELECT 
+                SUM(plein.kilometrage) AS Total_Kilometrage,
+                MAX(plein.kilometrage) - MIN(plein.kilometrage) AS Km_Parcourus,
+                SUM(plein.qte_plein) AS Total_Litres,
+                (SUM(plein.qte_plein) / (MAX(plein.kilometrage) - MIN(plein.kilometrage))) * 100 AS Consommation_Litres_Par_100Km,
+                COUNT(plein.id_plein) AS Nbre_De_Plein,
+                v.immatriculation,
+                c.nom AS Nom_Chauffeur,
+                m.nom_marque,
+                tc.nom_type_carburant
+            FROM plein
+                INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
+                INNER JOIN users u ON plein.id_user = u.id
+                INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+                INNER JOIN marque m ON v.id_marque = m.id_marque
+                INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+            WHERE 
+                (${targetKeysArray.length > 0 ? `v.id_vehicule IN (${targetKeysArray.map(() => '?').join(',')})` : '1=1'})
+                AND (${startDate && endDate ? `plein.date_plein BETWEEN ? AND ?` : '1=1'})
+            GROUP BY 
+                v.immatriculation, 
+                c.nom, 
+                m.nom_marque, 
+                tc.nom_type_carburant;
+        `;
 
-            const chauffeurs = await queryAsync(query);
-    
-            return res.status(200).json({
-                message: 'Liste des véhicules pleins récupérés avec succès',
-                data: chauffeurs,
-            });
-        } catch (error) {
-            console.error('Erreur lors de la récupération des chauffeurs :', error);
-    
-            return res.status(500).json({
-                error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
-            });
-        }
+        const queryParams = [
+            ...targetKeysArray,
+            ...(startDate && endDate ? [startDate, endDate] : [])
+        ];
+
+        const chauffeurs = await queryAsync(query, queryParams);
+
+        return res.status(200).json({
+            message: 'Liste des véhicules pleins récupérés avec succès',
+            data: chauffeurs,
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des chauffeurs :', error);
+
+        return res.status(500).json({
+            error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
+        });
+    }
 };
+
 
 
 exports.postCarburant = async (req, res) => {
