@@ -137,6 +137,7 @@ exports.getCarburantCinq = async (req, res) => {
 };
 
 exports.getCarburantConsomm = async (req, res) => {
+    console.log(req.query.targetKeys)
 
     try {
         const query = `SELECT 
