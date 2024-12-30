@@ -227,6 +227,7 @@ exports.getControleTechnique = async (req, res) => {
         const { filtre } = req.query;
         let whereClause = '';
 
+        console.log(filtre)
         switch (filtre) {
             case 'encours':
                 whereClause = 'WHERE ct.date_validite >= CURDATE()';
@@ -248,7 +249,15 @@ exports.getControleTechnique = async (req, res) => {
             SELECT ct.id_controle_tech, ct.date_controle, ct.date_validite, ct.kilometrage, 
                    ct.ref_controle, ct.resultat, ct.cout_device, ct.cout_ttc, ct.taxe, 
                    ct.commentaire, v.immatriculation, f.nom AS nom_fournisseur, 
-                   c.nom AS nom_chauffeur, m.nom_marque, tr.type_rep, sct.description
+                   c.nom AS nom_chauffeur, m.nom_marque, tr.type_rep, sct.description,
+                    CASE
+                        WHEN CURDATE() <= ct.date_validite THEN
+                            CASE
+                                WHEN ct.date_validite <= DATE_ADD(CURDATE(), INTERVAL 3 MONTH) THEN 'Expire dans 3 mois'
+                                ELSE 'En cours'
+                            END
+                        ELSE 'Expiré'
+                    END AS statut
             FROM controle_tech ct
             INNER JOIN vehicules v ON ct.immatriculation = v.id_vehicule
             INNER JOIN marque m ON v.id_marque = m.id_marque
