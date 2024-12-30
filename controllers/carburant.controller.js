@@ -192,6 +192,45 @@ exports.getCarburantConsomm = async (req, res) => {
 };
 
 
+exports.getCarburantConsomOne = async (req, res) => {
+    const { targetKeys, selectedDates } = req.query;
+
+    const targetKeysArray = targetKeys ? targetKeys.split(',') : [];
+    const [startDate, endDate] = selectedDates ? selectedDates.split(',') : [null, null];
+
+    try {
+        const query = `SELECT plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, plein.observation, plein.date_plein, u.nom, v.immatriculation, c.nom AS nom_chauffeur, m.nom_marque, tc.nom_type_carburant FROM plein
+                                INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
+                                INNER JOIN users u ON plein.id_user = u.id
+                                INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+                                INNER JOIN marque m ON v.id_marque = m.id_marque
+                                INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+                            WHERE 
+                                (${targetKeysArray.length > 0 ? `v.id_vehicule IN (${targetKeysArray.map(() => '?').join(',')})` : '1=1'})
+                                AND (${startDate && endDate ? `plein.date_plein BETWEEN ? AND ?` : '1=1'})
+                            GROUP BY 
+                                v.immatriculation
+                            `;
+
+            const queryParams = [
+                        ...targetKeysArray,
+                        ...(startDate && endDate ? [startDate, endDate] : [])
+                    ];
+                    
+            const vehicule = await queryAsync(query,queryParams);
+    
+            return res.status(200).json({
+                message: 'Liste des véhicules pleins récupérés avec succès',
+                data: vehicule,
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des chauffeurs :', error);
+    
+            return res.status(500).json({
+                error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
+            });
+        }
+};
 
 exports.postCarburant = async (req, res) => {
     
