@@ -139,12 +139,27 @@ exports.getCarburantCinq = async (req, res) => {
 exports.getCarburantConsomm = async (req, res) => {
 
     try {
-        const query = `SELECT plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, plein.observation, plein.date_plein, u.nom, v.immatriculation, c.nom AS nom_chauffeur, m.nom_marque, tc.nom_type_carburant FROM plein
+        const query = `SELECT 
+                            SUM(plein.kilometrage) AS Total_Kilometrage,
+                            MAX(plein.kilometrage) - MIN(plein.kilometrage) AS Km_Parcourus,
+                            SUM(plein.qte_plein) AS Total_Litres,
+                            (SUM(plein.qte_plein) / (MAX(plein.kilometrage) - MIN(plein.kilometrage))) * 100 AS Consommation_Litres_Par_100Km,
+                            COUNT(plein.id_plein) AS Nbre_De_Plein,
+                            v.immatriculation,
+                            c.nom AS Nom_Chauffeur,
+                            m.nom_marque,
+                            tc.nom_type_carburant
+                        FROM plein
                             INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
                             INNER JOIN users u ON plein.id_user = u.id
                             INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
                             INNER JOIN marque m ON v.id_marque = m.id_marque
-                            INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant`;
+                            INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+                        GROUP BY 
+                            v.immatriculation, 
+                            c.nom, 
+                            m.nom_marque, 
+                            tc.nom_type_carburant;`;
 
             const chauffeurs = await queryAsync(query);
     
