@@ -154,7 +154,8 @@ exports.getCarburantConsomm = async (req, res) => {
                 v.immatriculation,
                 c.nom AS Nom_Chauffeur,
                 m.nom_marque,
-                tc.nom_type_carburant
+                tc.nom_type_carburant,
+                plein.immatriculation
             FROM plein
                 INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
                 INNER JOIN users u ON plein.id_user = u.id
@@ -193,27 +194,26 @@ exports.getCarburantConsomm = async (req, res) => {
 
 
 exports.getCarburantConsomOne = async (req, res) => {
-    const { targetKeys, selectedDates } = req.query;
+    const { id_vehicule, selectedDates } = req.query;
 
-    const targetKeysArray = targetKeys ? targetKeys.split(',') : [];
     const [startDate, endDate] = selectedDates ? selectedDates.split(',') : [null, null];
-
+console.log(startDate, endDate)
     try {
-        const query = `SELECT plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, plein.observation, plein.date_plein, u.nom, v.immatriculation, c.nom AS nom_chauffeur, m.nom_marque, tc.nom_type_carburant FROM plein
+        const query =   `SELECT plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, plein.observation, plein.date_plein, u.nom, v.immatriculation, c.nom AS nom_chauffeur, m.nom_marque, tc.nom_type_carburant FROM plein
                                 INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
                                 INNER JOIN users u ON plein.id_user = u.id
                                 INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
                                 INNER JOIN marque m ON v.id_marque = m.id_marque
                                 INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
                             WHERE 
-                                (${targetKeysArray.length > 0 ? `v.id_vehicule IN (${targetKeysArray.map(() => '?').join(',')})` : '1=1'})
+                                (${id_vehicule ? `v.id_vehicule = ${id_vehicule}` : '1=1'})
                                 AND (${startDate && endDate ? `plein.date_plein BETWEEN ? AND ?` : '1=1'})
                             GROUP BY 
-                                v.immatriculation
+                                plein.id_plein
                             `;
 
             const queryParams = [
-                        ...targetKeysArray,
+                        ...id_vehicule,
                         ...(startDate && endDate ? [startDate, endDate] : [])
                     ];
                     
