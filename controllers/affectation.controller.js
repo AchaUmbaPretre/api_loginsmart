@@ -13,7 +13,29 @@ const queryAsync = (query, values = []) =>
 
 exports.getAffectation = async (req, res) => {
     try {
-        const query = `SELECT aff.id_affectations, aff.created_at, s.nom_site, c.nom AS nom_chauffeur, c.prenom AS prenom_chauffeur, u.nom, u.prenom FROM affectations aff
+        const query = `SELECT aff.id_affectations, aff.created_at, aff.commentaire, s.nom_site, c.nom AS nom_chauffeur, c.prenom AS prenom_chauffeur, u.nom, u.prenom FROM affectations aff
+                        LEFT JOIN sites s ON aff.id_site = s.id_site
+                        LEFT JOIN chauffeurs c ON aff.id_chauffeur = c.id_chauffeur
+                        INNER JOIN users u ON aff.user_cr = u.id`;
+    
+        const etatCivil = await queryAsync(query);
+        
+        return res.status(200).json({
+            message: 'Liste des affectations récupérés avec succès',
+            data: etatCivil,
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des affectations :', error);
+        
+        return res.status(500).json({
+                    error: "Une erreur s'est produite lors de la récupération des affectations.",
+        });
+    }
+}
+
+exports.getAffectationHistorique = async (req, res) => {
+    try {
+        const query = `SELECT aff.id_affectations, aff.created_at, aff.commentaire, s.nom_site, c.nom AS nom_chauffeur, c.prenom AS prenom_chauffeur, u.nom, u.prenom FROM historique_affectations aff
                         LEFT JOIN sites s ON aff.id_site = s.id_site
                         LEFT JOIN chauffeurs c ON aff.id_chauffeur = c.id_chauffeur
                         INNER JOIN users u ON aff.user_cr = u.id`;
