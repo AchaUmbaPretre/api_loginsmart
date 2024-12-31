@@ -13,7 +13,10 @@ const queryAsync = (query, values = []) =>
 
 exports.getAffectation = async (req, res) => {
     try {
-        const query = `SELECT * FROM affectations`;
+        const query = `SELECT aff.id_affectations, aff.created_at, s.nom_site, c.nom, c.prenom, u.nom, u.prenom FROM affectations aff
+                            LEFT JOIN sites s ON aff.id_site = s.id_site
+                            LEFT JOIN chauffeurs c ON aff.id_chauffeur = c.id_chauffeur
+                            INNER JOIN users u ON aff.user_cr = u.id`;
     
         const etatCivil = await queryAsync(query);
         
