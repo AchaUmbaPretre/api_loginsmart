@@ -18,4 +18,13 @@ router.get('/type_tache', typeController.getTache);
 router.get('/cat_piece', typeController.getCatPieces);
 router.get('/etat_maintenance', typeController.getEtatMaintenant);
 
+//Site
+router.get('/sites', typeController.getSites);
+
+//Ville
+router.get('/ville', typeController.getVille);
+
+//Zones
+router.get('/zones', typeController.getZones);
+
 module.exports = router;
