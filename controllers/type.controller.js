@@ -382,3 +382,23 @@ exports.getZones = async (req, res) => {
         });
     }
 }
+
+//Province
+exports.getProvince = async (req, res) => {
+
+    try {
+        const query = `SELECT * FROM provinces`;
+    
+        const provinces = await queryAsync(query);
+        
+        return res.status(200).json({
+            message: 'Liste des provinces récupérées avec succès',
+            data: provinces,
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des provinces:', error);
+        return res.status(500).json({
+            error: "Une erreur s'est produite lors de la récupération des provinces",
+        });
+    }
+}

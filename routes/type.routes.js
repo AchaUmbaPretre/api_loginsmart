@@ -27,4 +27,8 @@ router.get('/ville', typeController.getVille);
 //Zones
 router.get('/zones', typeController.getZones);
 
+//Province
+router.get('/province', typeController.getProvince);
+
+
 module.exports = router;
