@@ -35,8 +35,8 @@ exports.getChauffeurCount = async(req, res) => {
 exports.getChauffeur = async (req, res) => {
     try {
         const query = `SELECT ch.*, s.nom_site FROM chauffeurs ch
-                            INNER JOIN affectations a ON ch.id_chauffeur = a.id_chauffeur
-                            INNER JOIN sites s ON a.id_site = s.id_site`;
+                            LEFT JOIN affectations a ON ch.id_chauffeur = a.id_chauffeur
+                            LEFT JOIN sites s ON a.id_site = s.id_site`;
 
             const chauffeurs = await queryAsync(query);
     
