@@ -155,7 +155,7 @@ exports.getCarburantConsomm = async (req, res) => {
                 c.nom AS Nom_Chauffeur,
                 m.nom_marque,
                 tc.nom_type_carburant,
-                plein.immatriculation
+                plein.immatriculation AS id_vehicule
             FROM plein
                 INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
                 INNER JOIN users u ON plein.id_user = u.id
@@ -196,41 +196,52 @@ exports.getCarburantConsomm = async (req, res) => {
 exports.getCarburantConsomOne = async (req, res) => {
     const { id_vehicule, selectedDates } = req.query;
 
+    // Validation des paramètres
     const [startDate, endDate] = selectedDates ? selectedDates.split(',') : [null, null];
-console.log(startDate, endDate)
-    try {
-        const query =   `SELECT plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, plein.observation, plein.date_plein, u.nom, v.immatriculation, c.nom AS nom_chauffeur, m.nom_marque, tc.nom_type_carburant FROM plein
-                                INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
-                                INNER JOIN users u ON plein.id_user = u.id
-                                INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
-                                INNER JOIN marque m ON v.id_marque = m.id_marque
-                                INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
-                            WHERE 
-                                (${id_vehicule ? `v.id_vehicule = ${id_vehicule}` : '1=1'})
-                                AND (${startDate && endDate ? `plein.date_plein BETWEEN ? AND ?` : '1=1'})
-                            GROUP BY 
-                                plein.id_plein
-                            `;
 
-            const queryParams = [
-                        ...id_vehicule,
-                        ...(startDate && endDate ? [startDate, endDate] : [])
-                    ];
-                    
-            const vehicule = await queryAsync(query,queryParams);
-    
-            return res.status(200).json({
-                message: 'Liste des véhicules pleins récupérés avec succès',
-                data: vehicule,
-            });
-        } catch (error) {
-            console.error('Erreur lors de la récupération des chauffeurs :', error);
-    
-            return res.status(500).json({
-                error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
-            });
-        }
+    try {
+        // Construction de la requête SQL
+        const query = `
+            SELECT 
+                plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, 
+                plein.observation, plein.date_plein, u.nom, v.immatriculation, 
+                c.nom AS nom_chauffeur, m.nom_marque, tc.nom_type_carburant 
+            FROM plein
+            INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
+            INNER JOIN users u ON plein.id_user = u.id
+            INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+            INNER JOIN marque m ON v.id_marque = m.id_marque
+            INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+            WHERE 
+                (? IS NULL OR v.id_vehicule = ?)
+                AND (? IS NULL OR ? IS NULL OR plein.date_plein BETWEEN ? AND ?)
+            GROUP BY plein.id_plein
+        `;
+
+        // Préparation des paramètres de requête
+        const queryParams = [
+            id_vehicule || null, id_vehicule || null,
+            startDate || null, endDate || null, startDate || null, endDate || null
+        ];
+
+        // Exécution de la requête
+        const vehicule = await queryAsync(query, queryParams);
+
+        // Réponse réussie
+        return res.status(200).json({
+            message: 'Liste des véhicules pleins récupérés avec succès',
+            data: vehicule,
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des pleins :', error);
+
+        // Réponse en cas d'erreur
+        return res.status(500).json({
+            error: "Une erreur s'est produite lors de la récupération des données.",
+        });
+    }
 };
+
 
 exports.postCarburant = async (req, res) => {
     
