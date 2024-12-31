@@ -342,3 +342,43 @@ exports.getSites = async (req, res) => {
         });
     }
 }
+
+//Ville
+exports.getVille = async (req, res) => {
+
+    try {
+        const query = `SELECT * FROM villes`;
+    
+        const ville = await queryAsync(query);
+        
+        return res.status(200).json({
+            message: 'Liste des villes récupérées avec succès',
+            data: ville,
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des villes:', error);
+        return res.status(500).json({
+            error: "Une erreur s'est produite lors de la récupération des villes",
+        });
+    }
+}
+
+//Zone
+exports.getZones = async (req, res) => {
+
+    try {
+        const query = `SELECT * FROM zones`;
+    
+        const zones = await queryAsync(query);
+        
+        return res.status(200).json({
+            message: 'Liste des zones récupérées avec succès',
+            data: zones,
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des zones:', error);
+        return res.status(500).json({
+            error: "Une erreur s'est produite lors de la récupération des zones",
+        });
+    }
+}
