@@ -35,7 +35,7 @@ exports.getAffectation = async (req, res) => {
 
 exports.getAffectationHistorique = async (req, res) => {
     try {
-        const query = `SELECT aff.id_affectations, aff.created_at, aff.commentaire, s.nom_site, c.nom AS nom_chauffeur, c.prenom AS prenom_chauffeur, u.nom, u.prenom FROM historique_affectations aff
+        const query = `SELECT aff.id_historique, aff.date_affectation, aff.commentaire, aff.type_action, s.nom_site, c.nom AS nom_chauffeur, c.prenom AS prenom_chauffeur, u.nom, u.prenom FROM historique_affectations aff
                         LEFT JOIN sites s ON aff.id_site = s.id_site
                         LEFT JOIN chauffeurs c ON aff.id_chauffeur = c.id_chauffeur
                         INNER JOIN users u ON aff.user_cr = u.id`;
@@ -56,64 +56,37 @@ exports.getAffectationHistorique = async (req, res) => {
 }
 
 exports.postAffectation = async (req, res) => {
-    const connection = await queryAsync.getConnection(); // Assurez-vous de bien gérer la connexion à la base
     try {
-        // Validation des données envoyées
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
+        const { id_site, id_chauffeur, commentaire, user_cr } = req.body;
 
-        // Récupération des données du corps de la requête
-        const {
-            id_site,
-            id_chauffeur,
-            commentaire,
-            user_cr,
-        } = req.body;
-
-        // Démarrer une transaction pour garantir l'intégrité des données
-        await connection.beginTransaction();
-
-        // Insertion dans la table 'affectations'
         const queryAffectation = `
             INSERT INTO affectations (id_site, id_chauffeur, commentaire, user_cr) 
             VALUES (?, ?, ?, ?)
         `;
         const valuesAffectation = [id_site, id_chauffeur, commentaire, user_cr];
-        const resultAffectation = await connection.queryAsync(queryAffectation, valuesAffectation);
 
-        // Insertion dans la table 'historique_affectations'
+        const resultAffectation = await queryAsync(queryAffectation, valuesAffectation);
+
         const queryHistorique = `
-            INSERT INTO historique_affectations (id_site, id_chauffeur, type_action, commentaire, user_cr, ancien_site) 
-            VALUES (?, ?, 'ajout', ?, ?, NULL)  -- ancien_site est NULL lors du premier ajout
+            INSERT INTO historique_affectations (id_site, id_chauffeur, type_action, commentaire, user_cr, ancien_site)
+            VALUES (?, ?, 'ajout', ?, ?, NULL)
         `;
         const valuesHistorique = [id_site, id_chauffeur, commentaire, user_cr];
-        await connection.queryAsync(queryHistorique, valuesHistorique);
 
-        // Si tout est réussi, on valide la transaction
-        await connection.commit();
+        const resultHistorique = await queryAsync(queryHistorique, valuesHistorique);
 
-        // Réponse de succès
         return res.status(201).json({
             message: 'Affectation ajoutée avec succès.',
-            data: { id: resultAffectation.insertId },
+            affectationId: resultAffectation.insertId,
+            historiqueId: resultHistorique.insertId,
         });
     } catch (error) {
-        // Si une erreur se produit, on annule la transaction
-        await connection.rollback();
-        console.error('Erreur lors de l’ajout d\'une affectation:', error);
+        console.error('Erreur détaillée:', error);
 
-        // Gestion des erreurs
-        const statusCode = error.code === 'ER_DUP_ENTRY' ? 409 : 500;
-        const errorMessage =
-            error.code === 'ER_DUP_ENTRY'
-                ? "Une affectation avec ces informations existe déjà."
-                : "Une erreur s'est produite lors de l'ajout de l'affectation.";
-
-        return res.status(statusCode).json({ error: errorMessage });
-    } finally {
-        // Libérer la connexion à la base de données, qu'il y ait une erreur ou non
-        connection.release();
+        return res.status(500).json({
+            error: "Une erreur s'est produite lors de l'ajout de l'affectation.",
+            details: error.sqlMessage || error.message,
+        });
     }
 };
+
