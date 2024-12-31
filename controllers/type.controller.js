@@ -247,7 +247,8 @@ exports.getTypeReparation = async (req, res) => {
 exports.getFournisseur = async (req, res) => {
 
     try {
-        const query = `SELECT * FROM fournisseurs`;
+        const query = `SELECT f.id_fournisseur, f.nom, f.adresse, f.mail, f.tel, v.ville FROM fournisseurs f
+                            INNER JOIN villes v ON f.ville = v.id`;
     
         const typeFonction = await queryAsync(query);
         
