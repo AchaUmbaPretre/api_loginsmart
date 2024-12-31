@@ -29,3 +29,48 @@ exports.getAffectation = async (req, res) => {
         });
     }
 }
+
+exports.postAffectation = async (req, res) => {
+    
+    try {
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const {
+            id_site,
+            id_chauffeur,
+            commentaire,
+            user_cr
+        } = req.body;
+
+        const query = `
+            INSERT INTO affectations (
+                id_site, id_chauffeur, commentaire, user_cr
+                ) VALUES (?, ?, ?, ?)
+        `;
+
+        const values = [
+            id_site, id_chauffeur, commentaire,user_cr
+        ];
+
+        const result = await queryAsync(query, values);
+
+        return res.status(201).json({
+            message: 'Affectation ajoutée avec succès',
+            data: { id: result.insertId},
+        });
+    } catch (error) {
+        console.error('Erreur lors de l’ajout d une affectation :', error);
+
+        const statusCode = error.code === 'ER_DUP_ENTRY' ? 409 : 500;
+        const errorMessage =
+            error.code === 'ER_DUP_ENTRY'
+                ? "Une affectation avec ces informations existent déjà."
+                : "Une erreur s'est produite lors de l'ajout d'une affectation.";
+
+        return res.status(statusCode).json({ error: errorMessage });
+    }
+};
