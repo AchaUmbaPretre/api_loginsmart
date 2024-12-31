@@ -327,7 +327,9 @@ exports.getEtatMaintenant = async (req, res) => {
 exports.getSites = async (req, res) => {
 
     try {
-        const query = `SELECT * FROM sites`;
+        const query = `SELECT s.id_site, s.nom_site, s.adress, s.tel, s.state, v.ville, p.province FROM sites s
+                            INNER JOIN villes v ON s.IdVille = v.id
+                            INNER JOIN provinces p ON v.ref_prov = p.id`;
     
         const typeTache = await queryAsync(query);
         
