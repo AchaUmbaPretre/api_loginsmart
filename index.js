@@ -9,6 +9,8 @@ const vehiculeRoutes = require('./routes/vehicule.routes');
 const carburantRoutes = require('./routes/carburant.routes');
 const maintenanceRoutes = require('./routes/maintenance.routes');
 const typeRoutes = require('./routes/type.routes');
+const affectationRoutes = require('./routes/affectation.routes');
+
 
 const app = express();
 dotenv.config();
@@ -35,6 +37,8 @@ if (environment === 'development') {
   app.use('/api/carburant', carburantRoutes);
   app.use('/api/type', typeRoutes);
   app.use('/api/maintenance', maintenanceRoutes);
+  app.use('/api/affectation', affectationRoutes);
+
 
 
 app.listen(port, () => {
