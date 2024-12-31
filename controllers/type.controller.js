@@ -389,7 +389,8 @@ exports.getZones = async (req, res) => {
 exports.getProvince = async (req, res) => {
 
     try {
-        const query = `SELECT * FROM provinces`;
+        const query = `SELECT p.id, p.province, pays.pays FROM provinces p
+                            IN pays ON p.id_pays = pays.id`;
     
         const provinces = await queryAsync(query);
         
