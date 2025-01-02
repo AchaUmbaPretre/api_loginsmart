@@ -298,7 +298,8 @@ exports.postCarburant = async (req, res) => {
 };
 
 //Rapport carburant
-exports.getCarburantRapport = async (req, res) => {
+        //Détails pour chaque véhicule
+exports.getCarburantRapportDetailVehicule = async (req, res) => {
 
     try {
         const query = `SELECT 

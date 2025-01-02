@@ -11,4 +11,7 @@ router.get('/one', carburantController.getCarburantOne);
 router.get('/cinq_derniers', carburantController.getCarburantCinq)
 router.post('/', carburantController.postCarburant);
 
+router.get('/rapport_detail_vehicule', carburantController.getCarburantRapportDetailVehicule)
+
+
 module.exports = router;
