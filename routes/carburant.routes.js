@@ -16,5 +16,9 @@ router.get('/rapport_detail_site_SIEGE_KIN', carburantController.getCarburantRap
 router.get('/rapport_detail_site_all', carburantController.getCarburantRapportDetailSitesALL);
 router.get('/rapport_detail_info_gen', carburantController.getCarburantRapportInfoGen);
 
+//RAPPORT TYPE CARBURANT SIEGE KIN
+router.get('/rapport_carburant_siege_kin', carburantController.getCarburantTypeSiegeKin);
+router.get('/rapport_carburant_siege_Autres', carburantController.getCarburantTypeAutres);
+
 
 module.exports = router;

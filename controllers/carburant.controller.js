@@ -547,3 +547,94 @@ exports.getCarburantRapportInfoGen = async (req, res) => {
             });
         }
 }
+
+//RAPPORT TYPE CARBURANT SIEGE KIN
+exports.getCarburantTypeSiegeKin = async (req, res) => {
+
+    try {
+        const query = `SELECT 
+                            COUNT(DISTINCT v.id_vehicule) AS nbre_vehicule,
+                            tc.nom_type_carburant,
+                            COUNT(plein.id_plein) AS total_pleins,
+                            SUM(plein.qte_plein) AS total_litres,
+                            SUM(plein.kilometrage) AS total_kilometrage
+                        FROM 
+                            plein
+                        INNER JOIN 
+                            vehicules v ON plein.immatriculation = v.id_vehicule
+                        INNER JOIN 
+                            users u ON plein.id_user = u.id
+                        INNER JOIN 
+                            chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+                        INNER JOIN 
+                            type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+                        INNER JOIN 
+                            affectations af ON c.id_chauffeur = af.id_chauffeur
+                        INNER JOIN 
+                            sites st ON af.id_site = st.id_site
+                        WHERE st.id_site = 1
+                        GROUP BY 
+                            tc.id_type_carburant
+                        ORDER BY 
+                            v.immatriculation;
+                        `;
+
+            const rapport = await queryAsync(query);
+    
+            return res.status(200).json({
+                message: 'Liste de rapport de type carburant a ete récupérés avec succès',
+                data: rapport,
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des chauffeurs :', error);
+    
+            return res.status(500).json({
+                error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
+            });
+        }
+}
+
+exports.getCarburantTypeAutres = async (req, res) => {
+
+    try {
+        const query = `SELECT 
+                            COUNT(DISTINCT v.id_vehicule) AS nbre_vehicule,
+                            tc.nom_type_carburant,
+                            COUNT(plein.id_plein) AS total_pleins,
+                            SUM(plein.qte_plein) AS total_litres,
+                            SUM(plein.kilometrage) AS total_kilometrage
+                        FROM 
+                            plein
+                        INNER JOIN 
+                            vehicules v ON plein.immatriculation = v.id_vehicule
+                        INNER JOIN 
+                            users u ON plein.id_user = u.id
+                        INNER JOIN 
+                            chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+                        INNER JOIN 
+                            type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+                        INNER JOIN 
+                            affectations af ON c.id_chauffeur = af.id_chauffeur
+                        INNER JOIN 
+                            sites st ON af.id_site = st.id_site
+                        WHERE st.id_site = 1
+                        GROUP BY 
+                            tc.id_type_carburant
+                        ORDER BY 
+                            v.immatriculation;
+                        `;
+
+            const rapport = await queryAsync(query);
+    
+            return res.status(200).json({
+                message: 'Liste de rapport de type carburant a ete récupérés avec succès',
+                data: rapport,
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des chauffeurs :', error);
+    
+            return res.status(500).json({
+                error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
+            });
+        }
+}
