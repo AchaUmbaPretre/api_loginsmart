@@ -42,7 +42,9 @@ exports.getCarburant = async (req, res) => {
                             INNER JOIN marque m ON v.id_marque = m.id_marque
                             INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
                             INNER JOIN affectations af ON c.id_chauffeur = af.id_chauffeur
-                            INNER JOIN sites st ON af.id_site = st.id_site`;
+                            INNER JOIN sites st ON af.id_site = st.id_site
+                        ORDER BY plein.date_plein DESC
+                            `;
 
             const chauffeurs = await queryAsync(query);
     
@@ -72,6 +74,7 @@ exports.getCarburantOne = async (req, res) => {
                             INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
                             WHERE plein.immatriculation = ?
                             GROUP BY plein.id_plein 
+                            ORDER BY plein.date_plein DESC
                             `;
 
             const chauffeurs = await queryAsync(query,id_vehicule);
