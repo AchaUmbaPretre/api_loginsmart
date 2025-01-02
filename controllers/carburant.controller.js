@@ -35,12 +35,14 @@ exports.getCarburantCount = async (req, res) => {
 exports.getCarburant = async (req, res) => {
 
     try {
-        const query = `SELECT plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, plein.observation, plein.date_plein, u.nom, v.immatriculation, c.nom AS nom_chauffeur, m.nom_marque, tc.nom_type_carburant FROM plein
+        const query = `SELECT plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, plein.observation, plein.date_plein, u.nom, v.immatriculation, c.nom AS nom_chauffeur, m.nom_marque, tc.nom_type_carburant, st.nom_site, st.id_site  FROM plein
                             INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
                             INNER JOIN users u ON plein.id_user = u.id
                             INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
                             INNER JOIN marque m ON v.id_marque = m.id_marque
-                            INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant`;
+                            INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+                            INNER JOIN affectations af ON c.id_chauffeur = af.id_chauffeur
+                            INNER JOIN sites st ON af.id_site = st.id_site`;
 
             const chauffeurs = await queryAsync(query);
     
