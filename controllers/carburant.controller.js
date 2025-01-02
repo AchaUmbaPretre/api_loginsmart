@@ -460,3 +460,84 @@ exports.getCarburantRapportDetailSitesALL = async (req, res) => {
             });
         }
 }
+
+exports.getCarburantRapportInfoGen = async (req, res) => {
+
+    try {
+        const query = `SELECT 
+                        'SIEGE KIN' AS nom_site,
+                        1 AS id_site,
+                        p.province,
+                        z.NomZone AS zone,
+                        COUNT(plein.id_plein) AS total_pleins,
+                        SUM(plein.qte_plein) AS total_litres,
+                        SUM(plein.kilometrage) AS total_kilometrage
+                    FROM 
+                        plein
+                    INNER JOIN 
+                        users u ON plein.id_user = u.id
+                    INNER JOIN 
+                        chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+                    INNER JOIN 
+                        affectations af ON c.id_chauffeur = af.id_chauffeur
+                    INNER JOIN 
+                        sites st ON af.id_site = st.id_site
+                    INNER JOIN 
+                        villes vll ON st.IdVille = vll.id
+                    INNER JOIN 
+                        provinces p ON vll.ref_prov = p.id
+                    INNER JOIN 
+                        zones z ON st.IdZone = z.id
+                    WHERE 
+                        st.nom_site = 'SIEGE KIN'
+                    GROUP BY 
+                        p.province, z.NomZone
+
+                    UNION ALL
+
+                    SELECT 
+                        'Autre sites' AS nom_site,
+                        NULL AS id_site,
+                        p.province,
+                        z.NomZone AS zone,
+                        COUNT(plein.id_plein) AS total_pleins,
+                        SUM(plein.qte_plein) AS total_litres,
+                        SUM(plein.kilometrage) AS total_kilometrage
+                    FROM 
+                        plein
+                    INNER JOIN 
+                        users u ON plein.id_user = u.id
+                    INNER JOIN 
+                        chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+                    INNER JOIN 
+                        affectations af ON c.id_chauffeur = af.id_chauffeur
+                    INNER JOIN 
+                        sites st ON af.id_site = st.id_site
+                    INNER JOIN 
+                        villes vll ON st.IdVille = vll.id
+                    INNER JOIN 
+                        provinces p ON vll.ref_prov = p.id
+                    INNER JOIN 
+                        zones z ON st.IdZone = z.id
+                    WHERE 
+                        st.nom_site != 'SIEGE KIN'
+                    GROUP BY 
+                        p.province, z.NomZone
+                    ORDER BY 
+                        nom_site;
+                        `;
+
+            const chauffeurs = await queryAsync(query);
+    
+            return res.status(200).json({
+                message: 'Liste des véhicules pleins récupérés avec succès',
+                data: chauffeurs,
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des chauffeurs :', error);
+    
+            return res.status(500).json({
+                error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
+            });
+        }
+}
