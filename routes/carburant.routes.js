@@ -13,7 +13,7 @@ router.post('/', carburantController.postCarburant);
 
 router.get('/rapport_detail_vehicule', carburantController.getCarburantRapportDetailVehicule)
 router.get('/rapport_detail_site_SIEGE_KIN', carburantController.getCarburantRapportDetailSites)
-router.get('/rapport_detail_site_all', carburantController.getCarburantRapportDetailSites)
+router.get('/rapport_detail_site_all', carburantController.getCarburantRapportDetailSitesALL)
 
 
 module.exports = router;

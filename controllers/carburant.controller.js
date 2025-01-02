@@ -412,8 +412,6 @@ exports.getCarburantRapportDetailSitesALL = async (req, res) => {
 
     try {
         const query = `SELECT 
-                            v.immatriculation,
-                            v.id_vehicule,
                             c.nom AS nom_chauffeur,
                             st.nom_site,
                             st.id_site,
@@ -424,8 +422,6 @@ exports.getCarburantRapportDetailSitesALL = async (req, res) => {
                             SUM(plein.kilometrage) AS total_kilometrage
                         FROM 
                             plein
-                        INNER JOIN 
-                            vehicules v ON plein.immatriculation = v.id_vehicule
                         INNER JOIN 
                             users u ON plein.id_user = u.id
                         INNER JOIN 
@@ -443,7 +439,7 @@ exports.getCarburantRapportDetailSitesALL = async (req, res) => {
                         GROUP BY 
                             st.id_site
                         ORDER BY 
-                            v.immatriculation
+                            st.id_site
                         `;
 
             const chauffeurs = await queryAsync(query);
