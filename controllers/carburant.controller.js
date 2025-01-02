@@ -296,3 +296,54 @@ exports.postCarburant = async (req, res) => {
         return res.status(statusCode).json({ error: errorMessage });
     }
 };
+
+//Rapport carburant
+exports.getCarburantRapport = async (req, res) => {
+
+    try {
+        const query = `SELECT 
+                            v.immatriculation,
+                            c.nom AS nom_chauffeur,
+                            st.nom_site,
+                            st.id_site,
+                            m.nom_marque,
+                            tc.nom_type_carburant,
+                            COUNT(plein.id_plein) AS total_pleins,
+                            SUM(plein.qte_plein) AS total_litres,
+                            SUM(plein.kilometrage) AS total_kilometrage
+                        FROM 
+                            plein
+                        INNER JOIN 
+                            vehicules v ON plein.immatriculation = v.id_vehicule
+                        INNER JOIN 
+                            users u ON plein.id_user = u.id
+                        INNER JOIN 
+                            chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+                        INNER JOIN 
+                            marque m ON v.id_marque = m.id_marque
+                        INNER JOIN 
+                            type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+                        INNER JOIN 
+                            affectations af ON c.id_chauffeur = af.id_chauffeur
+                        INNER JOIN 
+                            sites st ON af.id_site = st.id_site
+                        GROUP BY 
+                            v.immatriculation, c.nom, st.nom_site, st.id_site, m.nom_marque, tc.nom_type_carburant
+                        ORDER BY 
+                            v.immatriculation;
+                        `;
+
+            const chauffeurs = await queryAsync(query);
+    
+            return res.status(200).json({
+                message: 'Liste des véhicules pleins récupérés avec succès',
+                data: chauffeurs,
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des chauffeurs :', error);
+    
+            return res.status(500).json({
+                error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
+            });
+        }
+}
