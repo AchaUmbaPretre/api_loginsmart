@@ -467,6 +467,7 @@ exports.getCarburantRapportInfoGen = async (req, res) => {
         const query = `SELECT 
                         'SIEGE KIN' AS nom_site,
                         1 AS id_site,
+                        COUNT(DISTINCT v.id_vehicule) nbre_vehicule,
                         p.province,
                         z.NomZone AS zone,
                         COUNT(plein.id_plein) AS total_pleins,
@@ -474,6 +475,8 @@ exports.getCarburantRapportInfoGen = async (req, res) => {
                         SUM(plein.kilometrage) AS total_kilometrage
                     FROM 
                         plein
+                    INNER JOIN 
+                        vehicules v ON plein.immatriculation = v.id_vehicule
                     INNER JOIN 
                         users u ON plein.id_user = u.id
                     INNER JOIN 
@@ -498,6 +501,7 @@ exports.getCarburantRapportInfoGen = async (req, res) => {
                     SELECT 
                         'Autre sites' AS nom_site,
                         NULL AS id_site,
+                        COUNT(DISTINCT v.id_vehicule) nbre_vehicule,
                         p.province,
                         z.NomZone AS zone,
                         COUNT(plein.id_plein) AS total_pleins,
@@ -505,6 +509,8 @@ exports.getCarburantRapportInfoGen = async (req, res) => {
                         SUM(plein.kilometrage) AS total_kilometrage
                     FROM 
                         plein
+                    INNER JOIN 
+                        vehicules v ON plein.immatriculation = v.id_vehicule
                     INNER JOIN 
                         users u ON plein.id_user = u.id
                     INNER JOIN 
