@@ -617,7 +617,8 @@ exports.getCarburantTypeAutres = async (req, res) => {
                             affectations af ON c.id_chauffeur = af.id_chauffeur
                         INNER JOIN 
                             sites st ON af.id_site = st.id_site
-                        WHERE st.id_site = 1
+                        WHERE 
+                            st.id_site <> 1 -- Exclut les enregistrements avec id_site = 1
                         GROUP BY 
                             tc.id_type_carburant
                         ORDER BY 
