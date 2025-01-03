@@ -642,3 +642,39 @@ exports.getCarburantTypeAutres = async (req, res) => {
             });
         }
 }
+
+//Consommation mensuelle de mes vehicules
+exports.getConsommationTypeCarburnt = async (req, res) => {
+
+    try {
+        const query = `SELECT
+                            YEAR(date_plein) AS annee,
+                            MONTH(date_plein) AS mois,
+                            SUM(qte_plein) AS total_conso,
+                            tc.nom_type_carburant
+                        FROM
+                            plein
+                        INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+                        GROUP BY
+                            YEAR(date_plein),
+                            MONTH(date_plein),
+                            plein.type_carburant,
+                            tc.nom_type_carburant
+                        ORDER BY
+                            annee DESC, mois DESC;
+                        `;
+
+            const consommation = await queryAsync(query);
+    
+            return res.status(200).json({
+                message: 'Liste de consommation de type carburant a ete récupérés avec succès',
+                data: consommation,
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des consommations carburants :', error);
+    
+            return res.status(500).json({
+                error: "Une erreur s'est produite lors de la récupération des consommations.",
+            });
+        }
+}
