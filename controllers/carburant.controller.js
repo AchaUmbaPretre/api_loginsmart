@@ -655,13 +655,15 @@ exports.getConsommationTypeCarburant = async (req, res) => {
                         FROM
                             plein
                         INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+                        WHERE
+                            YEAR(date_plein) = YEAR(CURDATE())  -- Filtre pour l'année en cours
                         GROUP BY
                             YEAR(date_plein),
                             MONTH(date_plein),
                             plein.type_carburant,
                             tc.nom_type_carburant
                         ORDER BY
-                            annee DESC, mois DESC;
+                            annee DESC, mois DESC
                         `;
 
             const consommation = await queryAsync(query);
