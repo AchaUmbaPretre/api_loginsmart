@@ -464,10 +464,11 @@ exports.getCarburantRapportDetailSitesALL = async (req, res) => {
         }
 }
 
-exports.getCarburantRapportInfoGen = async (req, res) => {
+/* exports.getCarburantRapportInfoGen = async (req, res) => {
+    const { filter } = req.query;
 
     try {
-        const query = `SELECT 
+        let query = `SELECT 
                         'SIEGE KIN' AS nom_site,
                         1 AS id_site,
                         COUNT(DISTINCT v.id_vehicule) nbre_vehicule,
@@ -535,7 +536,18 @@ exports.getCarburantRapportInfoGen = async (req, res) => {
                     ORDER BY 
                         nom_site;
                         `;
-
+            if ( filter === '7jours'){
+                query += ` AND DATE(plein.date_plein) >= CURDATE() - INTERVAL 7 DAY`;
+            } else if (filter === '30jours') {
+                query += ` AND DATE(plein.date_plein) >= CURDATE() - INTERVAL 30 DAY`;
+            } else if (filter === '90jours') {
+                query += ` AND DATE(plein.date_plein) >= CURDATE() - INTERVAL 90 DAY`;
+            } else if (filter === '180jours') {
+                query += ` AND DATE(plein.date_plein) >= CURDATE() - INTERVAL 180 DAY`;
+            } else if (filter === '360jours') {
+                query += ` AND DATE(plein.date_plein) >= CURDATE() - INTERVAL 1 YEAR`;
+            }
+            
             const chauffeurs = await queryAsync(query);
     
             return res.status(200).json({
@@ -549,8 +561,126 @@ exports.getCarburantRapportInfoGen = async (req, res) => {
                 error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
             });
         }
-}
+} */
 
+        exports.getCarburantRapportInfoGen = async (req, res) => {
+            const { filter } = req.query;
+        
+            try {
+                // Requête principale
+                let baseQuery = `
+                    SELECT 
+                        'SIEGE KIN' AS nom_site,
+                        1 AS id_site,
+                        COUNT(DISTINCT v.id_vehicule) AS nbre_vehicule,
+                        p.province,
+                        z.NomZone AS zone,
+                        COUNT(plein.id_plein) AS total_pleins,
+                        SUM(plein.qte_plein) AS total_litres,
+                        SUM(plein.kilometrage) AS total_kilometrage,
+                        MAX(plein.date_plein) AS date_plein
+                    FROM 
+                        plein
+                    INNER JOIN 
+                        vehicules v ON plein.immatriculation = v.id_vehicule
+                    INNER JOIN 
+                        users u ON plein.id_user = u.id
+                    INNER JOIN 
+                        chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+                    INNER JOIN 
+                        affectations af ON c.id_chauffeur = af.id_chauffeur
+                    INNER JOIN 
+                        sites st ON af.id_site = st.id_site
+                    INNER JOIN 
+                        villes vll ON st.IdVille = vll.id
+                    INNER JOIN 
+                        provinces p ON vll.ref_prov = p.id
+                    INNER JOIN 
+                        zones z ON st.IdZone = z.id
+                    WHERE 
+                        st.nom_site = 'SIEGE KIN'
+                    GROUP BY 
+                        p.province, z.NomZone
+        
+                    UNION ALL
+        
+                    SELECT 
+                        'Autre sites' AS nom_site,
+                        NULL AS id_site,
+                        COUNT(DISTINCT v.id_vehicule) AS nbre_vehicule,
+                        p.province,
+                        z.NomZone AS zone,
+                        COUNT(plein.id_plein) AS total_pleins,
+                        SUM(plein.qte_plein) AS total_litres,
+                        SUM(plein.kilometrage) AS total_kilometrage,
+                        MAX(plein.date_plein) AS date_plein
+                    FROM 
+                        plein
+                    INNER JOIN 
+                        vehicules v ON plein.immatriculation = v.id_vehicule
+                    INNER JOIN 
+                        users u ON plein.id_user = u.id
+                    INNER JOIN 
+                        chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+                    INNER JOIN 
+                        affectations af ON c.id_chauffeur = af.id_chauffeur
+                    INNER JOIN 
+                        sites st ON af.id_site = st.id_site
+                    INNER JOIN 
+                        villes vll ON st.IdVille = vll.id
+                    INNER JOIN 
+                        provinces p ON vll.ref_prov = p.id
+                    INNER JOIN 
+                        zones z ON st.IdZone = z.id
+                    WHERE 
+                        st.nom_site != 'SIEGE KIN'
+                    GROUP BY 
+                        p.province, z.NomZone
+                `;
+        
+                // Gestion des filtres
+                let filterCondition = "";
+                if (filter) {
+                    const filterMapping = {
+                        '7jours': '7 DAY',
+                        '30jours': '30 DAY',
+                        '90jours': '90 DAY',
+                        '180jours': '180 DAY',
+                        '360jours': '1 YEAR'
+                    };
+        
+                    if (filterMapping[filter]) {
+                        filterCondition = `WHERE date_plein >= CURDATE() - INTERVAL ${filterMapping[filter]}`;
+                    }
+
+                    console.log(filterCondition)
+                }
+        
+                // Ajout des filtres et tri
+                baseQuery = `
+                    SELECT * FROM (${baseQuery}) AS combined_query
+                    ${filterCondition}
+                    ORDER BY nom_site;
+                `;
+        
+                // Exécution de la requête
+                const chauffeurs = await queryAsync(baseQuery);
+        
+                // Réponse
+                return res.status(200).json({
+                    message: 'Liste des véhicules pleins récupérés avec succès',
+                    data: chauffeurs,
+                });
+            } catch (error) {
+                console.error('Erreur lors de la récupération des chauffeurs :', error);
+        
+                return res.status(500).json({
+                    error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
+                });
+            }
+        };
+        
+        
 //RAPPORT TYPE CARBURANT SIEGE KIN
 exports.getCarburantTypeSiegeKin = async (req, res) => {
 
@@ -687,19 +817,20 @@ exports.getReparationTypeCarburant = async (req, res) => {
     try {
         const query = `SELECT
                             YEAR(p.date_plein) AS annee,
-                            MONTH(p.date_plein) AS mois,
                             tc.nom_type_carburant,
                             SUM(p.qte_plein) AS total_conso_litres
                         FROM
                             plein p
                         INNER JOIN
                             type_carburant tc ON p.type_carburant = tc.id_type_carburant
+                        WHERE
+                            YEAR(date_plein) = YEAR(CURDATE())
                         GROUP BY
                             YEAR(p.date_plein),
-                            MONTH(p.date_plein),
                             tc.nom_type_carburant
                         ORDER BY
-                            annee DESC, mois DESC, tc.nom_type_carburant;
+                            annee DESC,tc.nom_type_carburant;
+
                         `;
 
             const reparation = await queryAsync(query);
