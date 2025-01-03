@@ -652,8 +652,6 @@ exports.getCarburantRapportDetailSitesALL = async (req, res) => {
                     if (filterMapping[filter]) {
                         filterCondition = `WHERE date_plein >= CURDATE() - INTERVAL ${filterMapping[filter]}`;
                     }
-
-                    console.log(filterCondition)
                 }
         
                 // Ajout des filtres et tri
