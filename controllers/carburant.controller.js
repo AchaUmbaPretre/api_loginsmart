@@ -644,7 +644,7 @@ exports.getCarburantTypeAutres = async (req, res) => {
 }
 
 //Consommation mensuelle de mes vehicules
-exports.getConsommationTypeCarburnt = async (req, res) => {
+exports.getConsommationTypeCarburant = async (req, res) => {
 
     try {
         const query = `SELECT

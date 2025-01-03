@@ -20,5 +20,7 @@ router.get('/rapport_detail_info_gen', carburantController.getCarburantRapportIn
 router.get('/rapport_carburant_siege_kin', carburantController.getCarburantTypeSiegeKin);
 router.get('/rapport_carburant_siege_Autres', carburantController.getCarburantTypeAutres);
 
+//Consommation mensuelle de mes vehicules
+router.get('/consommation_mensuelle', carburantController.getConsommationTypeCarburant);
 
 module.exports = router;
