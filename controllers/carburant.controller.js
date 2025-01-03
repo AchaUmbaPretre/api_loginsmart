@@ -680,3 +680,39 @@ exports.getConsommationTypeCarburant = async (req, res) => {
             });
         }
 }
+
+//Réparation de la consomation(Litre)
+exports.getReparationTypeCarburant = async (req, res) => {
+
+    try {
+        const query = `SELECT
+                            YEAR(p.date_plein) AS annee,
+                            MONTH(p.date_plein) AS mois,
+                            tc.nom_type_carburant,
+                            SUM(p.qte_plein) AS total_conso_litres
+                        FROM
+                            plein p
+                        INNER JOIN
+                            type_carburant tc ON p.type_carburant = tc.id_type_carburant
+                        GROUP BY
+                            YEAR(p.date_plein),
+                            MONTH(p.date_plein),
+                            tc.nom_type_carburant
+                        ORDER BY
+                            annee DESC, mois DESC, tc.nom_type_carburant;
+                        `;
+
+            const reparation = await queryAsync(query);
+    
+            return res.status(200).json({
+                message: 'Liste de reparation de type carburant a ete récupérés avec succès',
+                data: reparation,
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des consommations carburants :', error);
+    
+            return res.status(500).json({
+                error: "Une erreur s'est produite lors de la récupération des consommations.",
+            });
+        }
+}
