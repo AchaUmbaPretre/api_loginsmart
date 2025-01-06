@@ -563,7 +563,7 @@ exports.getCarburantRapportDetailSitesALL = async (req, res) => {
         }
 } */
 
-        exports.getCarburantRapportInfoGen = async (req, res) => {
+exports.getCarburantRapportInfoGen = async (req, res) => {
             const { filter } = req.query;
         
             try {
@@ -681,14 +681,17 @@ exports.getCarburantRapportDetailSitesALL = async (req, res) => {
         
 //RAPPORT TYPE CARBURANT SIEGE KIN
 exports.getCarburantTypeSiegeKin = async (req, res) => {
-
+    const { filter } = req.query;
+    
     try {
-        const query = `SELECT 
+        let query = `SELECT 
                             COUNT(DISTINCT v.id_vehicule) AS nbre_vehicule,
                             tc.nom_type_carburant,
                             COUNT(plein.id_plein) AS total_pleins,
                             SUM(plein.qte_plein) AS total_litres,
-                            SUM(plein.kilometrage) AS total_kilometrage
+                            SUM(plein.kilometrage) AS total_kilometrage,
+                            MAX(plein.date_plein) AS date_plein,
+                            v.id_vehicule
                         FROM 
                             plein
                         INNER JOIN 
@@ -706,9 +709,27 @@ exports.getCarburantTypeSiegeKin = async (req, res) => {
                         WHERE st.id_site = 1
                         GROUP BY 
                             tc.id_type_carburant
-                        ORDER BY 
-                            v.immatriculation;
                         `;
+                    let filterCondition = "";
+                    if (filter) {
+                        const filterMapping = {
+                            '7jours': '7 DAY',
+                            '30jours': '30 DAY',
+                            '90jours': '90 DAY',
+                            '180jours': '180 DAY',
+                            '360jours': '1 YEAR'
+                        };
+            
+                        if (filterMapping[filter]) {
+                            filterCondition = `WHERE date_plein >= CURDATE() - INTERVAL ${filterMapping[filter]}`;
+                        }
+                    }
+
+                    baseQuery = `
+                    SELECT * FROM (${baseQuery}) AS combined_query
+                    ${filterCondition}
+                    ORDER BY nom_site;
+                `;
 
             const rapport = await queryAsync(query);
     
