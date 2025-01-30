@@ -141,7 +141,7 @@ exports.getCarburantCinq = async (req, res) => {
         }
 };
 
-exports.getCarburantConsomm = async (req, res) => {
+/* exports.getCarburantConsomm = async (req, res) => {
 
     const { targetKeys, selectedDates } = req.query;
 
@@ -173,9 +173,7 @@ exports.getCarburantConsomm = async (req, res) => {
             GROUP BY 
                 v.immatriculation, 
                 c.nom, 
-                m.nom_marque, 
-                tc.nom_type_carburant;
-        `;
+                m.nom_marque        `;
 
         const queryParams = [
             ...targetKeysArray,
@@ -196,7 +194,63 @@ exports.getCarburantConsomm = async (req, res) => {
         });
     }
 };
+ */
 
+exports.getCarburantConsomm = async (req, res) => {
+    const { targetKeys, selectedDates } = req.query;
+
+    const targetKeysArray = targetKeys ? targetKeys.split(',') : [];
+    const [startDate, endDate] = selectedDates ? selectedDates.split(',') : [null, null];
+
+    try {
+        const query = `
+            SELECT 
+                v.id_vehicule,
+                v.immatriculation,
+                c.nom AS Nom_Chauffeur,
+                m.nom_marque,
+                SUM(plein.kilometrage) AS Total_Kilometrage,
+                MAX(plein.kilometrage) - MIN(plein.kilometrage) AS Km_Parcourus,
+                SUM(plein.qte_plein) AS Total_Litres,
+                MIN(plein.kilometrage) AS Km_Initial,
+                (SUM(plein.qte_plein) / (MAX(plein.kilometrage) - MIN(plein.kilometrage))) * 100 AS Consommation_Litres_Par_100Km,
+                COUNT(plein.id_plein) AS Nbre_De_Plein
+            FROM plein
+            INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
+            INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
+            INNER JOIN marque m ON v.id_marque = m.id_marque
+            WHERE 
+                (${targetKeysArray.length > 0 ? `v.id_vehicule IN (${targetKeysArray.map(() => '?').join(',')})` : '1=1'})
+                AND (${startDate && endDate ? `plein.date_plein BETWEEN ? AND ?` : '1=1'})
+            GROUP BY v.id_vehicule, v.immatriculation, c.nom, m.nom_marque
+        `;
+
+        const queryParams = [...targetKeysArray, ...(startDate && endDate ? [startDate, endDate] : [])];
+        const vehicules = await queryAsync(query, queryParams);
+
+        // Récupérer les détails des pleins pour chaque véhicule
+        for (let vehicule of vehicules) {
+            const detailQuery = `
+                SELECT plein.date_plein, plein.kilometrage, plein.qte_plein, tc.nom_type_carburant
+                FROM plein
+                INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
+                WHERE plein.immatriculation = ?
+                ORDER BY plein.date_plein DESC
+            `;
+
+            const details = await queryAsync(detailQuery, [vehicule.id_vehicule]);
+            vehicule.details = details;
+        }
+
+        return res.status(200).json({
+            message: "Liste des véhicules et leurs détails récupérés avec succès",
+            data: vehicules,
+        });
+    } catch (error) {
+        console.error("Erreur lors de la récupération des véhicules :", error);
+        return res.status(500).json({ error: "Une erreur s'est produite lors de la récupération des données." });
+    }
+};
 
 exports.getCarburantConsomOne = async (req, res) => {
     const { id_vehicule, selectedDates } = req.query;
@@ -711,6 +765,8 @@ exports.getCarburantTypeSiegeKin = async (req, res) => {
                             tc.id_type_carburant
                         `;
                     let filterCondition = "";
+                    
+                    let baseQuery ="";
                     if (filter) {
                         const filterMapping = {
                             '7jours': '7 DAY',
@@ -725,7 +781,7 @@ exports.getCarburantTypeSiegeKin = async (req, res) => {
                         }
                     }
 
-                    baseQuery = `
+                 baseQuery = `
                     SELECT * FROM (${baseQuery}) AS combined_query
                     ${filterCondition}
                     ORDER BY nom_site;
@@ -738,7 +794,7 @@ exports.getCarburantTypeSiegeKin = async (req, res) => {
                 data: rapport,
             });
         } catch (error) {
-            console.error('Erreur lors de la récupération des chauffeurs :', error);
+            console.error('Erreur lors de la récupération des carburant :', error);
     
             return res.status(500).json({
                 error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
