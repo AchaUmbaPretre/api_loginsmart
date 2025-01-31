@@ -318,7 +318,6 @@ exports.getCarburantConsomOne = async (req, res) => {
     }
 };
 
-
 exports.postCarburant = async (req, res) => {
     
     try {
