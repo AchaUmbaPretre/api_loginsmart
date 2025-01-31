@@ -207,7 +207,6 @@ exports.getCarburantConsomm = async (req, res) => {
             SELECT 
                 v.id_vehicule,
                 v.immatriculation,
-                c.nom AS Nom_Chauffeur,
                 m.nom_marque,
                 SUM(plein.kilometrage) AS Total_Kilometrage,
                 MAX(plein.kilometrage) - MIN(plein.kilometrage) AS Km_Parcourus,
@@ -217,12 +216,11 @@ exports.getCarburantConsomm = async (req, res) => {
                 COUNT(plein.id_plein) AS Nbre_De_Plein
             FROM plein
             INNER JOIN vehicules v ON plein.immatriculation = v.id_vehicule
-            INNER JOIN chauffeurs c ON plein.id_chauffeur = c.id_chauffeur
             INNER JOIN marque m ON v.id_marque = m.id_marque
             WHERE 
                 (${targetKeysArray.length > 0 ? `v.id_vehicule IN (${targetKeysArray.map(() => '?').join(',')})` : '1=1'})
                 AND (${startDate && endDate ? `plein.date_plein BETWEEN ? AND ?` : '1=1'})
-            GROUP BY v.id_vehicule, v.immatriculation, c.nom, m.nom_marque
+            GROUP BY v.id_vehicule, v.immatriculation, m.nom_marque
         `;
 
         const queryParams = [...targetKeysArray, ...(startDate && endDate ? [startDate, endDate] : [])];
