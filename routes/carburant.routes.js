@@ -16,6 +16,7 @@ router.put('/delete_carburant', carburantController.deleteCarburant)
 
 router.get('/rapport_detail_vehicule', carburantController.getCarburantRapportDetailVehicule);
 router.get('/rapport_detail_site_SIEGE_KIN', carburantController.getCarburantRapportDetailSites);
+router.get('/rapport_detail_site_Select', carburantController.getCarburantRapportDetailSiteSelect);
 router.get('/rapport_detail_site_all', carburantController.getCarburantRapportDetailSitesALL);
 router.get('/rapport_detail_info_gen', carburantController.getCarburantRapportInfoGen);
 
