@@ -1,7 +1,6 @@
 const { db } = require("./../config/database");
 const { validationResult } = require('express-validator');
 
-
 const queryAsync = (query, values = []) =>
     new Promise((resolve, reject) => {
         db.query(query, values, (error, results) => {
@@ -30,7 +29,6 @@ exports.getCarburantCount = async (req, res) => {
         });
     }
 };
-
 
 exports.getCarburant = async (req, res) => {
 
@@ -91,7 +89,6 @@ exports.getCarburantOne = async (req, res) => {
             });
         }
 };
-
 
 exports.getCarburantCinq = async (req, res) => {
 
