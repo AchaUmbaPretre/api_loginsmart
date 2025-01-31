@@ -41,6 +41,7 @@ exports.getCarburant = async (req, res) => {
                             INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
                             INNER JOIN affectations af ON c.id_chauffeur = af.id_chauffeur
                             INNER JOIN sites st ON af.id_site = st.id_site
+                            WHERE plein.est_supprime = 0
                         ORDER BY plein.date_plein DESC
                             `;
 
@@ -59,8 +60,29 @@ exports.getCarburant = async (req, res) => {
         }
 };
 
+exports.getCarburantOneV = async (req, res) => {
+    const { id_plein } = req.query;
+
+    try {
+        const query = `SELECT plein.* FROM plein WHERE plein.id_plein = ?`;
+
+            const plein = await queryAsync(query,id_plein);
+    
+            return res.status(200).json({
+                message: 'Liste des pleins récupérés avec succès',
+                data: plein,
+            });
+        } catch (error) {
+            console.error('Erreur lors de la récupération des pleins :', error);
+    
+            return res.status(500).json({
+                error: "Une erreur s'est produite lors de la récupération des pleins.",
+            });
+        }
+};
+
 exports.getCarburantOne = async (req, res) => {
-    const { id_vehicule } = req.query;
+    const { id_plein } = req.query;
 
     try {
         const query = `SELECT plein.id_plein, plein.qte_plein, plein.kilometrage, plein.matricule_ch, plein.observation, plein.date_plein, u.nom, v.immatriculation, c.nom AS nom_chauffeur, m.nom_marque, tc.nom_type_carburant, md.modele FROM plein
@@ -70,16 +92,16 @@ exports.getCarburantOne = async (req, res) => {
                             INNER JOIN marque m ON v.id_marque = m.id_marque
                             INNER JOIN modeles md ON m.id_marque = md.id_marque
                             INNER JOIN type_carburant tc ON plein.type_carburant = tc.id_type_carburant
-                            WHERE plein.immatriculation = ?
+                            WHERE plein.id_plein = ?
                             GROUP BY plein.id_plein 
                             ORDER BY plein.date_plein DESC
                             `;
 
-            const chauffeurs = await queryAsync(query,id_vehicule);
+            const plein = await queryAsync(query,id_plein);
     
             return res.status(200).json({
                 message: 'Liste des véhicules pleins récupérés avec succès',
-                data: chauffeurs,
+                data: plein,
             });
         } catch (error) {
             console.error('Erreur lors de la récupération des chauffeurs :', error);
@@ -348,6 +370,85 @@ exports.postCarburant = async (req, res) => {
         return res.status(statusCode).json({ error: errorMessage });
     }
 };
+
+exports.putCarburant = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const {
+            id_plein,
+            immatriculation,
+            qte_plein,
+            kilometrage,
+            type_carburant,
+            matricule_ch,
+            observation,
+            id_vehicule,
+            id_chauffeur,
+            id_user,
+            date_plein
+        } = req.body;
+
+        if (!id_plein) {
+            return res.status(400).json({ error: "L'identifiant du carburant est requis." });
+        }
+
+        const query = `
+            UPDATE plein
+            SET immatriculation = ?, qte_plein = ?, kilometrage = ?, type_carburant = ?,
+                matricule_ch = ?, observation = ?, id_vehicule = ?, id_chauffeur = ?, id_user = ?, date_plein = ?
+            WHERE id_plein = ?
+        `;
+
+        const values = [
+            immatriculation, qte_plein, kilometrage, type_carburant, matricule_ch, observation,
+            id_vehicule, id_chauffeur, id_user, date_plein, id_plein
+        ];
+
+        const result = await queryAsync(query, values);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Aucun carburant trouvé avec cet identifiant." });
+        }
+
+        return res.status(200).json({ message: "Carburant mis à jour avec succès" });
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour du carburant :", error);
+        return res.status(500).json({ error: "Une erreur s'est produite lors de la mise à jour du carburant." });
+    }
+};
+
+exports.deleteCarburant = async (req, res) => {
+    try {
+      const { id_plein } = req.query;
+
+  
+      if (!id_plein) {
+        return res.status(400).json({ message: "Paramètre 'id_plein' manquant." });
+      }
+  
+      const q = "UPDATE plein SET est_supprime = 1 WHERE id_plein = ?";
+  
+      db.query(q, [id_plein], (err, result) => {
+        if (err) {
+          console.error("Erreur de requête de base de données:", err);
+          return res.status(500).json({ message: "Une erreur de base de données s'est produite." });
+        }
+  
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ message: "Carburant introuvable." });
+        }
+  
+        return res.status(200).json({ message: "Carburant supprimé avec succès." });
+      });
+    } catch (error) {
+      console.error("Erreur inattendue:", error);
+      return res.status(500).json({ message: "Une erreur inattendue s'est produite." });
+    }
+  };
 
 //Rapport carburant
         //Détails pour chaque véhicule
