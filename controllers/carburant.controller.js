@@ -517,9 +517,9 @@ exports.getCarburantRapportDetailSites = async (req, res) => {
                             m.nom_marque,
                             md.modele,
                             tc.nom_type_carburant,
-                            COUNT(plein.id_plein) AS total_pleins,
-                            SUM(plein.qte_plein) AS total_litres,
-                            SUM(plein.kilometrage) AS total_kilometrage
+                            COUNT( DISTINCT plein.id_plein) AS total_pleins,
+                            SUM( DISTINCT plein.qte_plein) AS total_litres,
+                            SUM( DISTINCT plein.kilometrage) AS total_kilometrage
                         FROM 
                             plein
                         INNER JOIN 
@@ -540,7 +540,7 @@ exports.getCarburantRapportDetailSites = async (req, res) => {
                             sites st ON af.id_site = st.id_site
                         WHERE st.id_site = 1
                         GROUP BY 
-                            v.immatriculation, c.nom, st.nom_site, st.id_site, m.nom_marque, tc.nom_type_carburant
+                            v.immatriculation, c.nom, m.nom_marque, tc.nom_type_carburant
                         ORDER BY 
                             v.immatriculation;
                         `;
@@ -564,24 +564,31 @@ exports.getCarburantRapportDetailSiteSelect = async (req, res) => {
     const { filter } = req.query;
 
     try {
+        // Split filter string by comma and ensure it's an array of values
         const filterArray = filter ? filter.split(',').map(value => value.trim()) : [];
 
+        // Ensure filterArray contains values
         if (filterArray.length === 0) {
             return res.status(400).json({ message: "Invalid or missing 'filter' parameter." });
         }
 
+        // Validate if the filter contains valid values (if needed, you can add more checks here)
+        if (filterArray.some(value => isNaN(value))) {
+            return res.status(400).json({ message: "Invalid vehicle ID(s) in the filter." });
+        }
+
         const query = `
             SELECT 
+                YEAR(plein.date_plein) AS annee,
+                MONTH(plein.date_plein) AS mois,
                 v.immatriculation,
                 v.id_vehicule,
                 c.nom AS nom_chauffeur,
                 st.nom_site,
-                st.id_site,
                 m.nom_marque,
-                md.modele,
                 tc.nom_type_carburant,
-                COUNT(plein.id_plein) AS total_pleins,
                 SUM(plein.qte_plein) AS total_litres,
+                COUNT(plein.id_plein) AS total_pleins,
                 SUM(plein.kilometrage) AS total_kilometrage
             FROM 
                 plein
@@ -602,33 +609,32 @@ exports.getCarburantRapportDetailSiteSelect = async (req, res) => {
             INNER JOIN 
                 sites st ON af.id_site = st.id_site
             WHERE 
-                st.id_site = 1 AND plein.immatriculation IN (${filterArray.map(c => db.escape(c)).join(',')})
+                st.id_site = 1 
+                AND plein.immatriculation IN (${filterArray.map(c => db.escape(c)).join(',')})
             GROUP BY 
-                v.immatriculation, c.nom, st.nom_site, st.id_site, m.nom_marque, tc.nom_type_carburant
+                annee, mois, v.immatriculation, c.nom, st.nom_site, st.id_site, m.nom_marque, tc.nom_type_carburant
             ORDER BY 
-                v.immatriculation;
+                annee DESC, mois DESC, v.immatriculation;
         `;
 
-        const chauffeurs = await queryAsync(query);
+        const result = await queryAsync(query);
 
-        if (!chauffeurs || chauffeurs.length === 0) {
+        if (!result || result.length === 0) {
             return res.status(404).json({ message: "No data found for the given filter." });
         }
 
         return res.status(200).json({
-            message: 'Liste des véhicules pleins récupérés avec succès',
-            data: chauffeurs,
+            message: 'Evolution de la consommation par mois récupérée avec succès',
+            data: result,
         });
     } catch (error) {
-        console.error('Erreur lors de la récupération des chauffeurs :', error);
+        console.error('Erreur lors de la récupération des données :', error);
 
         return res.status(500).json({
-            error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
+            error: "Une erreur s'est produite lors de la récupération des données.",
         });
     }
 };
-
-
 
 exports.getCarburantRapportDetailSitesALL = async (req, res) => {
 
@@ -895,8 +901,7 @@ exports.getCarburantRapportInfoGen = async (req, res) => {
                     error: "Une erreur s'est produite lors de la récupération des chauffeurs.",
                 });
             }
-        };
-        
+};
         
 //RAPPORT TYPE CARBURANT SIEGE KIN
 exports.getCarburantTypeSiegeKin = async (req, res) => {

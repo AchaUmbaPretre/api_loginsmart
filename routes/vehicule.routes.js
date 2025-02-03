@@ -19,8 +19,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.get('/count', vehiculeController.getVehiculeCount)
-router.get('/', vehiculeController.getVehicule)
+router.get('/count', vehiculeController.getVehiculeCount);
+router.get('/', vehiculeController.getVehicule);
+router.get('/one', vehiculeController.getVehiculeOne);
 router.post('/', upload.array('img', 10),vehiculeController.postVehicule);
+router.put('/', upload.array('img', 10),vehiculeController.putVehicule);
+router.put('/delete_vehicule', vehiculeController.deleteVehicule);
 
 module.exports = router;
