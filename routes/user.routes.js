@@ -6,3 +6,5 @@ router.get('/', userController.getUsers)
 router.get('/one', userController.getUserOne)
 router.post('/', userController.registerUser)
 router.put('/', userController.putUser)
+
+module.exports = router;

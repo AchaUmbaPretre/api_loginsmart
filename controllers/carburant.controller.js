@@ -587,9 +587,9 @@ exports.getCarburantRapportDetailSiteSelect = async (req, res) => {
                 st.nom_site,
                 m.nom_marque,
                 tc.nom_type_carburant,
-                SUM(plein.qte_plein) AS total_litres,
-                COUNT(plein.id_plein) AS total_pleins,
-                SUM(plein.kilometrage) AS total_kilometrage
+                SUM(DISTINCT plein.qte_plein) AS total_litres,
+                COUNT(DISTINCT plein.id_plein) AS total_pleins,
+                SUM(DISTINCT plein.kilometrage) AS total_kilometrage
             FROM 
                 plein
             INNER JOIN 
