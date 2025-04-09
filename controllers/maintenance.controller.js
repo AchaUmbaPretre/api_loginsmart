@@ -227,7 +227,6 @@ exports.getControleTechnique = async (req, res) => {
         const { filtre } = req.query;
         let whereClause = '';
 
-        console.log(filtre)
         switch (filtre) {
             case 'encours':
                 whereClause = 'WHERE ct.date_validite >= CURDATE()';
